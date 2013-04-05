@@ -12,10 +12,11 @@ var(
 	UDPport = "8769"
 )
 
-func ListenforMaster(multicastAddr, multicastPort) {
-	destination = broadcast + ":" + UDPport
-	mcAddr, err = net.ResolveUDPAddr("udp", destination)
+func ListenforMaster(broadcast, UDPport) {
+	destination := broadcast + ":" + UDPport
+	mcAddr, err := net.ResolveUDPAddr("udp", destination)
 	_, _ = net.ListenMulticastUDP("udp", nil, mcAddr)
+	
 
 }
 
