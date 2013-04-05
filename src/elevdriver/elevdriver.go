@@ -109,11 +109,32 @@ func listen() {
 		floorList[key] = Read_bit(key)
 	}
 
-	oldStop := false
-	oldObs := false
-
-	for {
+	//oldStop := false
+	//oldObs := false
+	
+	// Here are the changes we did to the elevdriver!
+	atFloor := false
+	
+	for {	
+		atFloor := false
 		time.Sleep(1E7)
+		for key, floor := range floorMap {
+			if Read_bit(key) {
+				select {
+				case floorChan <- floor:
+				default:
+				}
+				atFloor = true
+			}
+		}
+		
+		if !atFloor {
+			select {
+			case floorChan <- -1:
+			default:
+			}
+		}
+		/*
 		for key, floor := range floorMap {
 			newValue := Read_bit(key)
 			if newValue != floorList[key] {
@@ -124,7 +145,8 @@ func listen() {
 			}
 			floorList[key] = newValue
 		}
-
+		*/
+		
 		for key, btn := range buttonMap {
 			newValue := Read_bit(key)
 			if newValue && !buttonList[key] {
@@ -135,7 +157,7 @@ func listen() {
 			}
 			buttonList[key] = newValue
 		}
-
+		/*
 		newStop := Read_bit(STOP)
 		if newStop && !oldStop {
 			go func() {
@@ -151,6 +173,7 @@ func listen() {
 			}()
 		}
 		oldObs = newObs
+		*/
 	}
 
 }
@@ -246,7 +269,8 @@ func SetFloor (floor int) {
 }
 
 func GetStopButton () {
-	<- stopButtonChan
+	// <- stopButtonChan
+	return Read_bit(STOP)
 }
 
 func SetStopButton() {
@@ -258,7 +282,8 @@ func ClearStopButton() {
 }
 
 func GetObs() bool {
-	return <- obsChan
+	// return <- obsChan
+	return Read_bit(OBSTRUCTION)
 }
 
 func SetDoor() {
