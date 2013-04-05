@@ -66,7 +66,7 @@ func MulticastFromMaster(broadcast, UDPport) {
 	mcAddr, err := net.ResolveUDPAddr("udp", destination)
 	errorhandler(err)
 
-	conn, err =
+	conn, err = net.ListenMulticastUDP("udp", nil, mcAddr)
 	
 
 }
