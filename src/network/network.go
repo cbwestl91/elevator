@@ -63,7 +63,10 @@ func UDPlistener(conn *net.UDPConn, pipe chan int){
 
 func MulticastFromMaster(broadcast, UDPport) {
 	destination := broadcast + ":" + UDPport
-	mcAddr, err := net.ListenMulticastUDP
+	mcAddr, err := net.ResolveUDPAddr("udp", destination)
+	errorhandler(err)
+
+	conn, err =
 	
 
 }
