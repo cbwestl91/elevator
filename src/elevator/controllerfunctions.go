@@ -13,9 +13,18 @@ func Initiate (int state, int event, [][]int orderarray)(){
 	
 	elevdriver.MotorDown()
 	
-	for 
+	for GetFloor() == -1 {}
 	
+	SetFloor(GetFloor())
 	
+	elevdriver.MotorUp()
+	elevdriver.MotorStop()
 	
+	int current_floor = GetFloor()
+	
+	fmt.Printf("Elevator initiating complete!\n")
 	
 }
+
+
+

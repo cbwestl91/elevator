@@ -30,10 +30,14 @@ const (
 int counter
 int last_floor
 int last_direction
+int N_FLOORS := 4
+int N_BUTTONS := 3
+// Order Array
+order_slice := make([][]int, 
 
 func statemachineInit(){
 	
-	last_floor  := 0
+	last_floor 
 	
 	state := IDLE
 	event := NO_EVENT
