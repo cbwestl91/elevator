@@ -39,7 +39,7 @@ for i := range(order_slice){
 	order_slice[i] = make([]int, N_BUTTONS)
 }
 
-func Statemachine(){
+func BootStatemachine(){
 	
 	last_floor = 0
 	
@@ -50,18 +50,18 @@ func Statemachine(){
 	
 	go ReceiveOrders(state, event, order_slice)
 	
-	for {
+}
+
+func UpdateStatemachine(){
+	
+	if state == UP || state == DOWN {
+		last_direction = state
+	} 	
 		
-		if state == UP || state == DOWN {
-			last_direction = state
-		} 	
+	FloorIndicator()
 		
-		FloorIndicator()
-		
-		CheckLights()
-		
-		
-	}
+	CheckLights()
+	
 }
 
 
