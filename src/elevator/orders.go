@@ -5,17 +5,15 @@ import "elevdriver"
 import "fmt"
 import "time"
 
-int floor_button 
-int direction_button
+var floor_button int
+var direction_button int
 		
-
-
-func ReceiveOrders (int state, int event, [][]int order_slice)(){
+func ReceiveOrders (state State, event Event, order_slice [][]int)(){
 	
 	for {
 		floorbutton, directionbutton := GetButton()
 	
-		if state != 4 || (state == 4 || event == 0) {
+		if state != EMERGENCY || (state == EMERGENCY || event == ORDER) {
 			// First column of the order slice refers to UP buttons
 			for i := 1; i <= N_FLOORS - 1; i++ {
 				if i == floorbutton && directionbutton == 1 {

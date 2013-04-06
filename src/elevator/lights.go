@@ -1,3 +1,4 @@
+
 package elevator
 
 import "elevdriver"
@@ -5,9 +6,9 @@ import "fmt"
 import "time"
 
 // checks pressed buttons and set lights accordingly
-func CheckLights(int state, int event, [][]int order_slice)(){
+func CheckLights(state State, event Event, order_slice [][]int)(){
 	
-	if state != 4 || (state == 4 && event == 0) {
+	if state != EMERGENCY || (state == EMERGENCY && event == ORDER) {
 		for i := 0; i < 3; i++ {
 			if order_slice[i][0] == 1 {
 				elevdriver.SetLight(i, UP)
@@ -38,9 +39,11 @@ func CheckLights(int state, int event, [][]int order_slice)(){
 
 // sets floorindicator light
 func FloorIndicator(){
+
 	if GetFloor()  > 0 { 
 		SetFloor(GetFloor())
 	}
+	
 }
 
 
