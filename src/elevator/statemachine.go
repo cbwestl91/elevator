@@ -32,19 +32,63 @@ int last_floor
 int last_direction
 int N_FLOORS := 4
 int N_BUTTONS := 3
+
 // Order Array
-order_slice := make([][]int, 
+order_slice := make([][]int, N_FLOORS)
+for i := range(order_slice){
+	order_slice[i] = make([]int, N_BUTTONS)
+}
 
 func statemachineInit(){
 	
-	last_floor 
+	last_floor = 0
 	
 	state := IDLE
 	event := NO_EVENT
 	
+	Initiate(state, event, order_slice)
 	
-	 
+	go ReceiveOrders(state, event, order_slice)
 	
+	for {
+		
+		if state == UP || state == DOWN {
+			last_direction = state
+		} 	
+		
+		
+	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

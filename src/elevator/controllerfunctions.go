@@ -5,11 +5,11 @@ import "elevdriver"
 import "fmt"
 import "time"
 
-func Initiate (int state, int event, [][]int orderarray)(){
+func Initiate (int state, int event, [][]int order_slice)(){
 	
 	elevdriver.Init()
 	
-	CheckLights(state,event,orderarray)
+	CheckLights(state,event,order_slice)
 	
 	elevdriver.MotorDown()
 	
@@ -22,9 +22,8 @@ func Initiate (int state, int event, [][]int orderarray)(){
 	
 	int current_floor = GetFloor()
 	
-	fmt.Printf("Elevator initiating complete!\n")
+	fmt.Printf("Elevator initiation complete!\n")
 	
 }
-
 
 
