@@ -36,5 +36,11 @@ func CheckLights(int state, int event, [][]int order_slice)(){
 	}
 }
 
+// sets floorindicator light
+func FloorIndicator(){
+	if GetFloor()  > 0 { 
+		SetFloor(GetFloor())
+	}
+}
 
 

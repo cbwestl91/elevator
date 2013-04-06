@@ -39,7 +39,7 @@ for i := range(order_slice){
 	order_slice[i] = make([]int, N_BUTTONS)
 }
 
-func statemachineInit(){
+func Statemachine(){
 	
 	last_floor = 0
 	
@@ -55,6 +55,10 @@ func statemachineInit(){
 		if state == UP || state == DOWN {
 			last_direction = state
 		} 	
+		
+		FloorIndicator()
+		
+		CheckLights()
 		
 		
 	}
