@@ -1,5 +1,8 @@
 package network
 
+// In this part, remote elevators are pinged through UDP
+// pings are also received, so that we may keep track of who is alive and who isn't
+
 import(
 	"fmt"
 	"net"
@@ -9,12 +12,14 @@ import(
 
 const(
 	sleepduration = 1000 //interval between alivemessages given in milliseconds
+	toleratedLosses = 4
+
 	isAlive = 1
 	dead = 0
 )
 
 var(
-	localIP = "129.241.187.142"
+	localIP = findmyIP()
 	broadcast = "235.241.187.255" //må se nærmere på adressen
 	
 	UDPport = "8769"
@@ -23,13 +28,21 @@ var(
 )
 
 var(
+	remoteIPshare chan int
 	isDeadchan chan int
 	isAlivechan chan int
 )
 
 func connectionHandler(remoteElev string) { //goroutine that keeps track of who is alive and who isn't
-
-
+	for{
+		select{
+			case <- isAlivechan:
+				// IMPLEMENT DEATH TIMER
+			case <- time.After(toleratedLosses * sleepduration * time.Millisecond):
+				// remote elevator death detected. TRANSMIT!
+				isDeadchan <- remoteElev
+		}
+	}
 }
 
 
@@ -71,7 +84,7 @@ func listenImAlive() [
 		_, senderAddr, err := isaliveconn.ReadFromUDP(data[0:])
 		errorhandler(err)
 		
-		if localIP != senderAddr.IP.String(){
+		if localIP != senderAddr.IP.String(){ // makes sure we don't pick up packets from ourselves
 			fmt.Println("ImAlive message received")
 			
 			remoteElev := senderAddr.IP.String()
@@ -84,13 +97,14 @@ func listenImAlive() [
 				anotherElev[remoteElev] = isAlivechan
 				go connectionHandler(remoteElev)
 				
-		
+				anotherElev[remoteElev] <- isAlive
+			}
+			remoteIPshare <- remoteElev
+		}
+	}
+}
 
-
-
-
-
-func findmyIP() string{
+func findmyIP() string{ // this function is weird, and should be looked at
 	systemIPs, err := net.InterfaceAddrs()
 	errorhandler(err)
 
