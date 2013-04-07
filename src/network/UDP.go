@@ -7,7 +7,11 @@ import(
 	"strings"
 )
 
-const sleepduration = 1000 //interval between alivemessages given in milliseconds
+const(
+	sleepduration = 1000 //interval between alivemessages given in milliseconds
+	isAlive = 1
+	dead = 0
+)
 
 var(
 	localIP = "129.241.187.142"
@@ -15,7 +19,18 @@ var(
 	
 	UDPport = "8769"
 	TCPport = " 8770"
+
 )
+
+var(
+	isDeadchan chan int
+	isAlivechan chan int
+)
+
+func connectionHandler(remoteElev string) { //goroutine that keeps track of who is alive and who isn't
+
+
+}
 
 
 func sendImAlive() {
@@ -50,7 +65,7 @@ func listenImAlive() [
 	errorhandler(err)
 
 	var data [512]byte
-	anotherElevFound := make(map[string]chan int)
+	anotherElev := make(map[string]chan int)
 
 	for {
 		_, senderAddr, err := isaliveconn.ReadFromUDP(data[0:])
@@ -59,16 +74,21 @@ func listenImAlive() [
 		if localIP != senderAddr.IP.String(){
 			fmt.Println("ImAlive message received")
 			
-			friendlyNeighbourhoodElev := senderAddr.IP.String()
+			remoteElev := senderAddr.IP.String()
+			inMap := anotherElev[remoteElev] //might require an additional input var
 			
+			if inMap{ // inform handler that some IP already in map is still alive, and reset death timer
+				anotherElev[remoteElev] <- isAlive
+			}
+			else{ //new participant found, must add to map and give designated handler
+				anotherElev[remoteElev] = isAlivechan
+				go connectionHandler(remoteElev)
+				
 		
 
 
 
-func aliveCounter() {
 
-
-}
 
 func findmyIP() string{
 	systemIPs, err := net.InterfaceAddrs()
@@ -91,63 +111,3 @@ func errorhandler(err error){
 	break
 	}
 }
-
-/*
-func ListenforMaster(broadcast, UDPport) (masterexists bool) { //returns true if master exists, false if not
-	pipe := make(chan bool)
-
-	conn := UDPconnEstablisher(broadcast, UDPport)
-	
-	go UDPlistener(conn, pipe)
-
-	for{
-		select{
-			case <- pipe:
-				masterexists := true
-	
-			case <-time.After(500 * time.Millisecond):
-				fmt.Println("No master currently exists")
-				masterexists := false
-		}
-		return masterexists
-	}
-}
-
-
-func UDPconnEstablisher(broadcast, UDPport) (conn *net.UDPConn){
-
-	destination := broadcast + ":" + UDPport
-	mcAddr, err := net.ResolveUDPAddr("udp", destination)
-	errorhandler(err)
-
-	fmt.Println("Multicast adress obtained")
-
-	conn, err = net.ListenMulticastUDP("udp", nil, mcAddr)
-	errorhandler(err)
-
-	fmt.Println("UDP broadcast found")
-	
-	return conn
-}
-
-func UDPlistener(conn *net.UDPConn, pipe chan int){
-	v := 0
-	var buf [512]byte
-	for{
-		n, _, _ := conn.ReadFromUDP(buf[0:])
-		json.Unmarshal(buf[0:n], &v)
-		pipe <- v
-	}
-}
-
-
-func MulticastFromMaster(broadcast, UDPport) {
-	destination := broadcast + ":" + UDPport
-	mcAddr, err := net.ResolveUDPAddr("udp", destination)
-	errorhandler(err)
-
-	conn, err = net.ListenMulticastUDP("udp", nil, mcAddr)
-	
-
-}
-*/
