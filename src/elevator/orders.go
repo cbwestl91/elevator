@@ -55,7 +55,7 @@ func StopAtCurrentFloor(state State, order_slice [][]int)(int){
 	
 	var current int = GetFloor()
 	
-	if state == 1 {
+	if state == UP {
 		for i = 0; i < 3; i = i+2 {
 			if current == 0 && order_slice[current][i] == 1 {
 				return 1
@@ -71,17 +71,102 @@ func StopAtCurrentFloor(state State, order_slice [][]int)(int){
 			}
 		}
 		
-		var orders_above_current int
+		var orders_above_current int := 0
 		
 		for i = current+1; i < 4; i++ {
-			
+			for j = 0; j < 3; j++ {
+				if order_slice[i][j] == 1 {
+					orders_above_current++
+				}
+			}
 		}
 		
+		if order_slice[current][1] == 1 && orders_above_current == 0 {
+			return 1
+		}
+		
+		if current == 3 && array[3][1] == 1 {
+			return 1	
+		}
 	}
+	
+	else if state == DOWN {
+		for i = 1; i < 3; i++ {
+			if current == 0 && order_slice[0][i] == 1 {
+				return -1
+			}
+			else if current == 1 && order_slice[1][i] == 1 {
+				return -1
+			}
+			else if current == 2 && order_slice[2][i] == 1 {
+				return -1
+			}
+			else if current == 3 && order_slice[3][i] == 1 {
+				return -1
+			}
+		}
+		
+		if current == 0 && order_slice[0][0] == 1 {
+			return -1
+		}
+		
+		var orders_below_current int := 0
+		
+		for i = 0; i < current; i++ {
+			for j = 0; j < 3; j++ {
+				if order_slice[i][j] == 1 {
+					orders_below_current++
+				}
+			}
+		}
+		
+		if order_slice[current][0] == 1 && orders_below_current == 0{
+			return -1
+		}
+	}
+	
+	else if state = EMERGENCY {
+		for i = 0; i < 3; i++ {
+			if current == 0 && order_slice[0][i] == 1{
+				return 2
+			}
+			else if current == 1 && order_slice[1][i] == 1{
+				return 2
+			}
+			else if current == 2 && order_slice[2][i] == 1{
+				return 2
+			}
+			else if current == 3 && order_slice[3][i] == 1{
+				return 2
+			}
+		}
+	}
+	
+	return 0
 }
 
-
-
+func DeleteOrders(order_slice [][]int)(){
+	if GetFloor() == 1{
+		for i = 0; i < 4; i++ {
+			order_slice[0][i] == 0
+		}
+	}
+	else if GetFloor() == 2{
+		for i = 0; i < 4; i++ {
+			order_slice[1][i] == 0
+		}
+	}
+	else if GetFloor() == 3{
+		for i = 0; i < 4; i++ {
+			order_slice[2][i] == 0
+		}
+	}
+	else if GetFloor() == 4{
+		for i = 0; i < 4; i++ {
+			order_slice[3][i] == 0
+		}
+	}
+}
 
 
 

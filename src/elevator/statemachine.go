@@ -31,6 +31,7 @@ func BootStatemachine(state State, ){
 	
 	Initiate(state, event, order_slice)
 	
+	go CheckLights(state, event, order_slice)
 	go ReceiveOrders(state, event, order_slice)
 	go elevdriver.MotorHandler
 	go elevdriver.Listen
@@ -43,8 +44,6 @@ func UpdateStatemachine(state State){
 	} 	
 		
 	FloorIndicator()
-		
-	CheckLights()
 	
 }
 
@@ -82,7 +81,7 @@ func statemachineIdle(state State, event Event)() {
 				state = DOWN
 			}
 			else if DetermineDirection(last_direction, order_slice) == 1 {
-				if GetFloor() == -1 {
+				if elevdriver.GetFloor() == -1 {
 					Initiate(state, event, order_slice)
 					state = IDLE
 					break
@@ -113,7 +112,16 @@ func statemachineUp(state State, event Event)() {
 			state = EMERGENCY
 		case SENSOR: // Destination reached || someone wants to go UP || no orders above DOWN
 			FloorIndicator()
-			if(
+			if StopAtCurrentFloor(state, order_slice) == 1 {
+				elevdriver.MotorStop()
+				state = OPEN_DOOR
+				DeleteOrders(order_slice)
+				break
+			}
+			else if elevdriver.GetFloor() == 4 {
+				elevdriver.MotorStop()
+				state = IDLE
+			}
 		case NO_EVENT:
 	}
 	
@@ -130,6 +138,17 @@ func statemachineDown(state State, event Event)() {
 			StopButtonPushed(state, event, order_slice)
 			state = EMERGENCY
 		case SENSOR:
+			FloorIndicator()
+			if StopAtCurrentFloor(state, order_slice) == -1 {
+				elevdriver.MotorStop()
+				state = OPEN_DOOR
+				DeleteOrders(order_slice)
+				break
+			}
+			else if elevdriver.GetFloor() == 1 {
+				elevdriver.MotorStop()
+				state = IDLE
+			}
 		case NO_EVENT:
 	}
 	
@@ -139,6 +158,26 @@ func statemachineOpendoor(state State, event Event)() {
 	
 	switch event {
 		case ORDER:
+			elevdriver.SetDoor()
+			for i = 0; i < 30; i++{
+				if elevdriver.GetFloor() == -1 && elevdriver.GetObs() == 0 {
+					elevdriver.ClearDoor()
+					state = IDLE
+					break
+				}
+				else if elevdriver.GetStopButton() == 1 {
+					StopButtonPushed()
+					state = EMERGENCY
+					break
+				}
+				time.Sleep(1*time.Millisecond)
+				if elevdriver.GetObs() == 1 {
+					i = 0
+				}
+			}
+			DeleteOrders(order_slice)
+			elevdriver.ClearDoor()
+			
 		case STOP:
 		case OBSTRUCTION:
 		case SENSOR:

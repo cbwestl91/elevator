@@ -84,7 +84,7 @@ func StopButtonPushed(state State, event Event, order_slice [][]int)() {
 	}
 	CheckLights(state, event, order_slice)
 	elevdriver.MotorStop()
-	for
+
 }
 
 
