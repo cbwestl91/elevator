@@ -63,8 +63,28 @@ func DetermineDirection(last_direction int, order_slice [][]int)(int){
 
 } 
 
+func StartMotor(direction int)() {
+	
+	if direction == -1 {
+		elevdriver.MotorDown()
+	}
+	else if direction == 1 {
+		elevdriver.MotorUp()
+	}
+}
 
 
+func StopButtonPushed(state State, event Event, order_slice [][]int)() {
+	
+	elevdriver.SetStopButton()
+	for i = 0; i < 4; i++ {
+		for j = 0; j < 3; j++ {
+			order_slice[i][j] = 0
+		}
+	}
+	CheckLights(state, event, order_slice)
+	elevdriver.MotorStop()
+}
 
 
 

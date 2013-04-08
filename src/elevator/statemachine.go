@@ -32,7 +32,8 @@ func BootStatemachine(state State, ){
 	Initiate(state, event, order_slice)
 	
 	go ReceiveOrders(state, event, order_slice)
-	
+	go elevdriver.MotorHandler
+	go elevdriver.Listen
 }
 
 func UpdateStatemachine(state State){
@@ -51,37 +52,111 @@ func RunStatemachine(state State, event Event){
 	
 	switch state {
 		case IDLE:
-			statemachineIdle(event)
+			statemachineIdle(state,event)
 		case UP:
-			statemachineUp(event)
+			statemachineUp(state,event)
 		case DOWN:
-			statemachineDown(event)
+			statemachineDown(state,event)
 		case OPEN_DOOR:
-			statemachineOpendoor(event)
+			statemachineOpendoor(state,event)
 		case EMERGENCY:
-			statemachineEmergency(event)
+			statemachineEmergency(state,event)
 	}
 	
 }
 
-func statemachineIdle(event Event)() {
-
+func statemachineIdle(state State, event Event)() {
+	
+	switch event {
+		case ORDER:
+			if DetermineDirection(last_direction, order_slice) != 2 && GetFloor() == -1 {
+				Initiate(state, event, order_slice)
+				state = IDLE
+				break
+			}
+			StartMotor(DetermineDirection(last_direction,order_slice))
+			if DetermineDirection(last_direction, order_slice) == -2 {
+				state = OPEN_DOOR
+			}
+			else if DetermineDirection(last_direction, order_slice) == -1 {
+				state = DOWN
+			}
+			else if DetermineDirection(last_direction, order_slice) == 1 {
+				if GetFloor() == -1 {
+					Initiate(state, event, order_slice)
+					state = IDLE
+					break
+				}
+				state = UP
+			}
+		case STOP:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
+		case OBSTRUCTION:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
+		case SENSOR:
+		case NO_EVENT:
+	}
+	
 }
 
-func statemachineUp(event Event)() {
+func statemachineUp(state State, event Event)() {
 
+	switch event {
+		case ORDER:
+		case STOP:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
+		case OBSTRUCTION:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
+		case SENSOR:
+			FloorIndicator()
+			if(
+		case NO_EVENT:
+	}
+	
 }
 
-func statemachineDown(event Event)() {
+func statemachineDown(state State, event Event)() {
 
+	switch event {
+		case ORDER:
+		case STOP:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
+		case OBSTRUCTION:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
+		case SENSOR:
+		case NO_EVENT:
+	}
+	
 }
 
-func statemachineOpendoor(event Event)() {
-
+func statemachineOpendoor(state State, event Event)() {
+	
+	switch event {
+		case ORDER:
+		case STOP:
+		case OBSTRUCTION:
+		case SENSOR:
+		case NO_EVENT:
+	}
+	
 }
 
-func statemachineEmergency(event Event)() {
+func statemachineEmergency(state State, event Event)() {
 
+	switch event {
+		case ORDER:
+		case STOP:
+		case OBSTRUCTION:
+		case SENSOR:
+		case NO_EVENT:
+	}
+	
 }
 
 

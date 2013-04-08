@@ -54,7 +54,7 @@ var motorChan chan Direction
 var stopButtonChan chan bool
 var obsChan chan bool
 
-func motorHandler() {
+func MotorHandler() {
 	currentDir := NONE
 	Write_analog(MOTOR, MIN_SPEED)
 	for {
@@ -78,7 +78,7 @@ func motorHandler() {
 	}
 }
 
-func listen() {
+func Listen() {
 	var floorMap = map[int] int {
 		SENSOR1 : 1,
 		SENSOR2 : 2,

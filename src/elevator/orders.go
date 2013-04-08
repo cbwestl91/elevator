@@ -51,3 +51,7 @@ func ReceiveOrders (state State, event Event, order_slice [][]int)(){
 30 emp 31 do4 32 co4
 */
 
+func StopCurrentFloor
+
+	current int = GetFloor()
+	
