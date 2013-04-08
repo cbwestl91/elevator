@@ -111,7 +111,7 @@ func statemachineUp(state State, event Event)() {
 		case OBSTRUCTION:
 			StopButtonPushed(state, event, order_slice)
 			state = EMERGENCY
-		case SENSOR:
+		case SENSOR: // Destination reached || someone wants to go UP || no orders above DOWN
 			FloorIndicator()
 			if(
 		case NO_EVENT:

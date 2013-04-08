@@ -51,7 +51,77 @@ func ReceiveOrders (state State, event Event, order_slice [][]int)(){
 30 emp 31 do4 32 co4
 */
 
-func StopCurrentFloor
-
-	current int = GetFloor()
+func StopAtCurrentFloor(state State, order_slice [][]int)(int){
 	
+	var current int = GetFloor()
+	
+	if state == 1 {
+		for i = 0; i < 3; i = i+2 {
+			if current == 0 && order_slice[current][i] == 1 {
+				return 1
+			}
+			else if current == 1 && order_slice[current][i] == 1 {
+				return 1
+			}
+			else if current == 2 && order_slice[current][i] == 1 {
+				return 1
+			}
+			else if current == 3 && order_slice[current][i] == 1 {
+				return 1
+			}
+		}
+		
+		var orders_above_current int
+		
+		for i = current+1; i < 4; i++ {
+			
+		}
+		
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
