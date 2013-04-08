@@ -20,12 +20,15 @@ var(
 var(
 	
 	updateTCPmap chan TCPconnection
-	remoteIPshare chan string
+	IPshareChan chan string
 	isDeadchan chan string
 	isAlivechan chan int
+
+	commChan chan string
 )
 
 type TCPconnection struct {
 	socket net.Conn
 	IP string
 }
+

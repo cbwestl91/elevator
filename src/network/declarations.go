@@ -1,5 +1,9 @@
 package network
 
+import(
+	"net"
+)
+
 const(
 	sleepduration = 1000 //interval between alivemessages given in milliseconds
 	toleratedLosses = 4
@@ -20,12 +24,15 @@ var(
 var(
 	
 	updateTCPmap chan TCPconnection
-	remoteIPshareChan chan string
+	IPshareChan chan string
 	isDeadchan chan string
 	isAlivechan chan int
+
+	commChan chan string
 )
 
 type TCPconnection struct {
 	socket net.Conn
 	IP string
 }
+

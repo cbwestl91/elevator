@@ -1,3 +1,5 @@
+package network
+
 /*
 func ListenforMaster(broadcast, UDPport) (masterexists bool) { //returns true if master exists, false if not
 	pipe := make(chan bool)

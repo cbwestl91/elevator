@@ -5,20 +5,10 @@ package network
 import(
 	"fmt"
 	"net"
-	"time"
 	"strings"
 )
 
-var(
-	commChan chan string
-	
-
-func sendTCP(){
-
-
-}
-
-func receiveTCP(){
+func mapOverseer() {
 
 
 }
@@ -38,18 +28,39 @@ func listenTCP(){
 			if err != nil {
 				fmt.Println("error accepting TCP connection")
 			} else {
-				remoteElev := socket.RemoteAddr().String()
+				remoteElevAddr := socket.RemoteAddr().String()
 				
-				
-			
-			
-	
-	
-	
+				remoteElevSplitter := strings.Split(remoteElevAddr, ":")
+				remoteElevIP := remoteElevSplitter[0]
+				newMapEntry := TCPconnection{socket, remoteElevIP}
 
+				// found new peer. will forward info about peer
+				updateTCPmap <- newMapEntry
+			} // what happens if several identical copies are made? overwrite?
+		}
+	}
 }
 
 func connectTCP(){
 	
 
 }
+
+
+
+
+
+
+
+
+/*
+func sendTCP(){
+
+
+}
+
+func receiveTCP(){
+
+
+}
+*/

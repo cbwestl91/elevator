@@ -66,18 +66,18 @@ func listenImAlive() {
 			fmt.Println("ImAlive message received")
 			
 			remoteElev := senderAddr.IP.String()
-			inMap := anotherElev[remoteElev] //might require an additional input var
+			_, inMap := anotherElev[remoteElev]
 			
 			if inMap{ // inform handler that some IP already in map is still alive, and reset death timer
 				anotherElev[remoteElev] <- isAlive
 			} else{ //new participant found, must add to map and give designated handler
 				
 				anotherElev[remoteElev] = isAlivechan
-				go connectionHandler(remoteElev)
+				go UDPconnectionHandler(remoteElev)
 				
 				anotherElev[remoteElev] <- isAlive
 			}
-			remoteIPshare <- remoteElev
+			IPshare <- remoteElev
 		}
 	}
 }
