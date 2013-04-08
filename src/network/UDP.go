@@ -8,32 +8,11 @@ import(
 	"net"
 	"time"
 	"strings"
+	"os"
 )
 
-const(
-	sleepduration = 1000 //interval between alivemessages given in milliseconds
-	toleratedLosses = 4
 
-	isAlive = 1
-	dead = 0
-)
-
-var(
-	localIP = findmyIP()
-	broadcast = "235.241.187.255" //må se nærmere på adressen
-	
-	UDPport = "8769"
-	TCPport = " 8770"
-
-)
-
-var(
-	remoteIPshare chan string
-	isDeadchan chan string
-	isAlivechan chan int
-)
-
-func connectionHandler(remoteElev string) { //goroutine that keeps track of who is alive and who isn't
+func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of who is alive and who isn't
 	for{
 		select{
 			case <- isAlivechan:
@@ -118,9 +97,9 @@ func findmyIP() string{ // this function is weird, and should be looked at. retu
 	return myIP
 }
 
-func errorhandler(err error){ // tidies up code. will be replace by individualized error handling for each error
+func errorhandler(err error){ // tidies up code. will be replaced by individualized error handling for each error
 	if err != nil {
-		fmt.Println("Fatal error in network package")
-	break
+		fmt.Fprintf(os.Stderr, "Fatal error: %s", err.Error())
+		os.Exit(1)
 	}
 }
