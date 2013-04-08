@@ -159,7 +159,7 @@ func statemachineOpendoor(state State, event Event)() {
 	switch event {
 		case ORDER:
 			elevdriver.SetDoor()
-			for i = 0; i < 30; i++{
+			for i = 0; i < 300; i++{
 				if elevdriver.GetFloor() == -1 && elevdriver.GetObs() == 0 {
 					elevdriver.ClearDoor()
 					state = IDLE
@@ -170,17 +170,66 @@ func statemachineOpendoor(state State, event Event)() {
 					state = EMERGENCY
 					break
 				}
-				time.Sleep(1*time.Millisecond)
+				time.Sleep(10*time.Millisecond)
 				if elevdriver.GetObs() == 1 {
 					i = 0
 				}
 			}
 			DeleteOrders(order_slice)
 			elevdriver.ClearDoor()
-			
+			if DetermineDirection(last_direction,order_slice) == -2 {
+				state = OPEN_DOOR
+			}
+			else if DetermineDirection(last_direction,order_slice) == -1 {
+				state = DOWN
+				elevdriver.MotorDown()
+			}
+			else if DetermineDirection(last_direction,order_slice) == 1 {
+				state = UP
+				elevdriver.MotorUp()
+			}
+			else if DetermineDirection(last_direction,order_slice) == 2 {
+				state = IDLE
+			}
 		case STOP:
+			StopButtonPushed(state, event, order_slice)
+			state = EMERGENCY
 		case OBSTRUCTION:
 		case SENSOR:
+			fmt.Printf("Elevator reached floor %d\n", GetFloor())
+			elevdriver.SetDoor()
+			for i = 0; i < 300; i++{
+				if elevdriver.GetFloor() == -1 && elevdriver.GetObs() == 0 {
+					elevdriver.ClearDoor()
+					state = IDLE
+					break
+				}
+				else if elevdriver.GetStopButton() == 1 {
+					StopButtonPushed()
+					state = EMERGENCY
+					break
+				}
+				time.Sleep(10*time.Millisecond)
+				if elevdriver.GetObs() == 1 {
+					i = 0
+				}
+			}
+			DeleteOrders(order_slice)
+			elevdriver.ClearDoor()
+			if DetermineDirection(last_direction,order_slice) == -2 {
+				state = OPEN_DOOR
+			}
+			else if DetermineDirection(last_direction,order_slice) == -1 {
+				state = DOWN
+				elevdriver.MotorDown()
+			}
+			else if DetermineDirection(last_direction,order_slice) == 1 {
+				state = UP
+				elevdriver.MotorUp()
+			}
+			else if DetermineDirection(last_direction,order_slice) == 2 {
+				state = IDLE
+			}
 		case NO_EVENT:
 	}
 	
@@ -197,6 +246,7 @@ func statemachineEmergency(state State, event Event)() {
 	}
 	
 }
+
 
 
 

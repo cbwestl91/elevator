@@ -7,8 +7,8 @@ import "time"
 
 func HandleELevator() {
 	
-	state State := IDLE
-	event Event := NO_EVENT
+	var state State := IDLE
+	var event Event := NO_EVENT
 	
 	BootStatemachine()
 	
