@@ -13,8 +13,7 @@ static comedi_t *it_g = NULL;
 
 
 
-int io_init()
-{
+int io_init(){
     int i, status = 0;
 
     it_g = comedi_open("/dev/comedi0");
@@ -37,29 +36,25 @@ int io_init()
 
 
 
-void io_set_bit(int channel)
-{
+void io_set_bit(int channel){
     comedi_dio_write(it_g, channel >> 8, channel & 0xff, 1);
 }
 
 
 
-void io_clear_bit(int channel)
-{
+void io_clear_bit(int channel){
     comedi_dio_write(it_g, channel >> 8, channel & 0xff, 0);
 }
 
 
 
-void io_write_analog(int channel, int value)
-{
+void io_write_analog(int channel, int value){
     comedi_data_write(it_g, channel>>8, channel&0xff, 0, AREF_GROUND, value);
 }
 
 
 
-int io_read_bit(int channel)
-{
+int io_read_bit(int channel){
     unsigned int data=0;
     comedi_dio_read(it_g, channel>>8, channel&0xff, &data);
 
@@ -68,8 +63,7 @@ int io_read_bit(int channel)
 
 
 
-int io_read_analog(int channel)
-{
+int io_read_analog(int channel){
     lsampl_t data = 0;
     comedi_data_read(it_g, channel>>8, channel&0xff, 0, AREF_GROUND, &data);
 

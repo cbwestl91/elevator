@@ -1,9 +1,7 @@
-
+// Functions for controlling the lights on the elevatorpanel
 package elevator
 
 import "elevdriver"
-import "fmt"
-import "time"
 
 // checks pressed buttons and set lights accordingly
 func CheckLights(state State, event Event, order_slice [][]int)(){
@@ -12,28 +10,25 @@ func CheckLights(state State, event Event, order_slice [][]int)(){
 		if state != EMERGENCY || (state == EMERGENCY && event == ORDER) {
 			for i := 0; i < 3; i++ {
 				if order_slice[i][0] == 1 {
-					elevdriver.SetLight(i, UP)
-				}
-				else if order_slice[i][0] == 0 {
-					elevdriver.ClearLight(i, UP)
+					elevdriver.SetLight(i, 1)
+				} else if order_slice[i][0] == 0 {
+					elevdriver.ClearLight(i, 1)
 				}
 			}
 			for i := 1; i < 4; i++ {
 				if order_slice[i][0] == 1 {
-					elevdriver.SetLight(i, DOWN)
-				}
-				else if order_slice[i][0] == 0 {
-					elevdriver.ClearLight(i, DOWN)
+					elevdriver.SetLight(i, 2)
+				} else if order_slice[i][0] == 0 {
+					elevdriver.ClearLight(i, 2)
 				}
 			}
 		}
 	
 		for i := 0; i < 4; i++ {
-			if order_slice[k][2] == 1 {
-				elevdriver.SetLight(k, NONE)
-			}
-			else if order_slice[k][2] == 0 {
-				elevdriver.ClearLight(k, NONE)
+			if order_slice[i][2] == 1 {
+				elevdriver.SetLight(i, 0)
+			} else if order_slice[i][2] == 0 {
+				elevdriver.ClearLight(i, 0)
 			}
 		}
 	}
@@ -43,8 +38,8 @@ func CheckLights(state State, event Event, order_slice [][]int)(){
 // sets floorindicator light
 func FloorIndicator(){
 
-	if GetFloor()  > 0 { 
-		SetFloor(GetFloor())
+	if elevdriver.GetFloor()  > 0 { 
+		elevdriver.SetFloor(elevdriver.GetFloor())
 	}
 	
 }

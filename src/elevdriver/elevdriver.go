@@ -44,8 +44,8 @@ func Init() {
 	stopButtonChan = make(chan bool)
 	obsChan = make(chan bool)
 
-	go listen()
-	go motorHandler()
+	go Listen()
+	go MotorHandler()
 }
 
 var buttonChan chan button
@@ -116,7 +116,7 @@ func Listen() {
 	atFloor := false
 	
 	for {	
-		atFloor := false
+		atFloor = false
 		time.Sleep(1E7)
 		for key, floor := range floorMap {
 			if Read_bit(key) {
@@ -268,7 +268,7 @@ func SetFloor (floor int) {
 	}
 }
 
-func GetStopButton () {
+func GetStopButton () bool {
 	// <- stopButtonChan
 	return Read_bit(STOP)
 }
