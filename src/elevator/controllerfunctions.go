@@ -19,8 +19,6 @@ func Initiate (state State, event Event, order_slice [][]int)(){
 	elevdriver.MotorUp()
 	elevdriver.MotorStop()
 	
-	var current_floor int = elevdriver.GetFloor()
-	
 	fmt.Printf("Elevator initiation complete!\n")
 	
 }
@@ -54,6 +52,8 @@ func DetermineDirection(last_direction int, order_slice [][]int)int{
 	} else {
 		return 2 //No orders, no direction
 	}
+	
+	return 0
 
 } 
 

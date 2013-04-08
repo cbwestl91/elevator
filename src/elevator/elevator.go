@@ -11,7 +11,7 @@ func HandleELevator() {
 	for i := range(order_slice){
 		order_slice[i] = make([]int, N_BUTTONS)
 	}
-	BootStatemachine(state, order_slice)
+	BootStatemachine(state, event, order_slice)
 	
 	for {
 		UpdateStatemachine(state)
