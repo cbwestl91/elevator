@@ -132,19 +132,19 @@ func StopAtCurrentFloor(state State, order_slice [][]int)(int){
 
 func DeleteOrders(order_slice [][]int)(){
 	if elevdriver.GetFloor() == 1{
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			order_slice[0][i] = 0
 		}
 	} else if elevdriver.GetFloor() == 2{
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			order_slice[1][i] = 0
 		}
 	} else if elevdriver.GetFloor() == 3{
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			order_slice[2][i] = 0
 		}
 	} else if elevdriver.GetFloor() == 4{
-		for i := 0; i < 4; i++ {
+		for i := 0; i < 3; i++ {
 			order_slice[3][i] = 0
 		}
 	}
