@@ -46,8 +46,6 @@ func sendImAlive() {
 }
 
 func listenImAlive() {
-	fmt.Println(localIP)
-
 	destination := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp", destination)
 	errorhandler(err)
@@ -80,21 +78,6 @@ func listenImAlive() {
 			IPshareChan <- remoteElev
 		}
 	}
-}
-
-func findmyIP() string{ // this function is weird, and should be looked at. returns ip6 -.- working on better option
-	systemIPs, err := net.InterfaceAddrs()
-	errorhandler(err)
-
-	tempIPstring := make([]string, len(systemIPs))
-	
-	for i := range systemIPs{
-		temp := systemIPs[i].String()
-		ip := strings.Split(temp, "/")
-		tempIPstring[i] = ip[0]
-	}
-	myIP := tempIPstring[2]
-	return myIP
 }
 
 func errorhandler(err error){ // tidies up code. will be replaced by individualized error handling for each error
