@@ -28,7 +28,7 @@ func ReceiveOrders (state State, event Event, order_slice [][]int)(){
 	
 		// Third column of the order slice refers to COMMAND buttons
 		for i := 1; i <= N_FLOORS; i++ {
-			if i == floorbutton && directionbutton == 3 {
+			if i == floorbutton && directionbutton == 0 {
 				order_slice[i-1][2] = 1
 			}
 		}
