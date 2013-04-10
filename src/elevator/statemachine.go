@@ -16,75 +16,75 @@ const (
 	EMERGENCY 
 )
 
-func (elevinf *elevatorinfo) BootStatemachine (event Event){
+func (elevinf *Elevatorinfo) BootStatemachine (){
 	
 	elevinf.last_floor = 0
 	
-	Initiate(event)
+	elevinf.Initiate()
 	
-	go CheckLights()
-	go ReceiveOrders()
-	go SetEvent()
+	go elevinf.CheckLights()
+	go elevinf.ReceiveOrders()
+	go elevinf.SetEvent()
 	go elevdriver.MotorHandler()
 	go elevdriver.Listen()
 }
 
-func UpdateStatemachine(state State){
+func (elevinf *Elevatorinfo) UpdateStatemachine(){
 	
-	if state == UP{
-		last_direction = 1
-	} else if state == DOWN {
-		last_direction = 2
+	if elevinf.state == UP{
+		elevinf.last_direction = 1
+	} else if elevinf.state == DOWN {
+		elevinf.last_direction = 2
 	}
 		
 	FloorIndicator()
 	
 }
 
-func (elevinf *elevatorinfo) RunStatemachine(){
+func (elevinf *Elevatorinfo) RunStatemachine(){
 	
 	switch elevinf.state {
 		case IDLE:
-			statemachineIdle()
+			elevinf.statemachineIdle()
 		case UP:
-			statemachineUp()
+			elevinf.statemachineUp()
 		case DOWN:
-			statemachineDown()
+			elevinf.statemachineDown()
 		case OPEN_DOOR:
-			statemachineOpendoor()
+			elevinf.statemachineOpendoor()
 		case EMERGENCY:
-			statemachineEmergency()
+			elevinf.statemachineEmergency()
 	}
 	
 }
 
-func (elevinf *elevatorinfo) statemachineIdle() {
+func (elevinf *Elevatorinfo) statemachineIdle() {
 	
 	switch elevinf.event {
 		case ORDER:
-			if DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
-				Initiate()
+			if elevinf.DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
+				elevinf.Initiate()
 				elevinf.state = IDLE
 				break
 			}
-			StartMotor(DetermineDirection())
-			if DetermineDirection() == -2 {
+			StartMotor(elevinf.DetermineDirection())
+			if elevinf.DetermineDirection() == -2 {
 				elevinf.state = OPEN_DOOR
-			} else if DetermineDirection() == -1 {
+			} else if elevinf.DetermineDirection() == -1 {
 				elevinf.state = DOWN
-			} else if DetermineDirection() == 1 {
+			} else if elevinf.DetermineDirection() == 1 {
 				if elevdriver.GetFloor() == -1 {
-					Initiate()
+					elevinf.Initiate()
 						elevinf.state = IDLE
 					break
 				}
 				elevinf.state = UP
 			}
 		case STOP:
-			StopButtonPushed()
+			elevinf.StopButtonPushed()
 			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
-			StopButtonPushed()
+			elevinf.StopButtonPushed()
 			elevinf.state = EMERGENCY
 		case SENSOR:
 		case NO_EVENT:
@@ -92,48 +92,48 @@ func (elevinf *elevatorinfo) statemachineIdle() {
 	
 }
 
-func (elevinf *elevatorinfo) statemachineUp() {
+func (elevinf *Elevatorinfo) statemachineUp() {
 
 	switch elevinf.event {
 		case ORDER:
 		case STOP:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			elevinf.StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			elevinf.StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case SENSOR: // Destination reached || someone wants to go UP || no orders above DOWN
 			FloorIndicator()
-			if StopAtCurrentFloor(state, order_slice) == 1 {
+			if elevinf.StopAtCurrentFloor() == 1 {
 				elevdriver.MotorStop()
-				state = OPEN_DOOR
-				DeleteOrders(order_slice)
+				elevinf.state = OPEN_DOOR
+				elevinf.DeleteOrders()
 				break
 			} else if elevdriver.GetFloor() == 4 {
 				elevdriver.MotorStop()
-				state = IDLE
+				elevinf.state = IDLE
 			}
 		case NO_EVENT:
 	}
 	
 }
 
-func (elevinf *elevatorinfo) statemachineDown() {
+func (elevinf *Elevatorinfo) statemachineDown() {
 
 	switch elevinf.event {
 		case ORDER:
 		case STOP:
-			StopButtonPushed()
+			elevinf.StopButtonPushed()
 			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
-			StopButtonPushed()
+			elevinf.StopButtonPushed()
 			elevinf.state = EMERGENCY
 		case SENSOR:
 			FloorIndicator()
-			if StopAtCurrentFloor() == -1 {
+			if elevinf.StopAtCurrentFloor() == -1 {
 				elevdriver.MotorStop()
 				elevinf.state = OPEN_DOOR
-				DeleteOrders()
+				elevinf.DeleteOrders()
 				break
 			} else if elevdriver.GetFloor() == 1 {
 				elevdriver.MotorStop()
@@ -144,7 +144,7 @@ func (elevinf *elevatorinfo) statemachineDown() {
 	
 }
 
-func (elevinf *elevatorinfo) statemachineOpendoor() {
+func (elevinf *Elevatorinfo) statemachineOpendoor() {
 	
 	switch elevinf.event {
 		case ORDER:
@@ -155,7 +155,7 @@ func (elevinf *elevatorinfo) statemachineOpendoor() {
 					elevinf.state = IDLE
 					break
 				} else if elevdriver.GetStopButton() == true {
-					StopButtonPushed()
+					elevinf.StopButtonPushed()
 					elevinf.state = EMERGENCY
 					break
 				}
@@ -164,21 +164,21 @@ func (elevinf *elevatorinfo) statemachineOpendoor() {
 					i = 0
 				}
 			}
-			DeleteOrders()
+			elevinf.DeleteOrders()
 			elevdriver.ClearDoor()
-			if DetermineDirection() == -2 {
+			if elevinf.DetermineDirection() == -2 {
 				elevinf.state = OPEN_DOOR
-			} else if DetermineDirection() == -1 {
+			} else if elevinf.DetermineDirection() == -1 {
 				elevinf.state = DOWN
 				elevdriver.MotorDown()
-			} else if DetermineDirection() == 1 {
+			} else if elevinf.DetermineDirection() == 1 {
 				elevinf.state = UP
 				elevdriver.MotorUp()
-			} else if DetermineDirection() == 2 {
+			} else if elevinf.DetermineDirection() == 2 {
 				elevinf.state = IDLE
 			}
 		case STOP:
-			StopButtonPushed()
+			elevinf.StopButtonPushed()
 			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
 		case SENSOR:
@@ -190,7 +190,7 @@ func (elevinf *elevatorinfo) statemachineOpendoor() {
 					elevinf.state = IDLE
 					break
 				} else if elevdriver.GetStopButton() == true {
-					StopButtonPushed()
+					elevinf.StopButtonPushed()
 					elevinf.state = EMERGENCY
 					break
 				}
@@ -199,17 +199,17 @@ func (elevinf *elevatorinfo) statemachineOpendoor() {
 					i = 0
 				}
 			}
-			DeleteOrders()
+			elevinf.DeleteOrders()
 			elevdriver.ClearDoor()
-			if DetermineDirection() == -2 {
+			if elevinf.DetermineDirection() == -2 {
 				elevinf.state = OPEN_DOOR
-			} else if DetermineDirection() == -1 {
-				state = DOWN
-				elevinf.elevdriver.MotorDown()
-			} else if DetermineDirection() == 1 {
-				state = UP
-				elevinf.elevdriver.MotorUp()
-			} else if DetermineDirection() == 2 {
+			} else if elevinf.DetermineDirection() == -1 {
+				elevinf.state = DOWN
+				elevdriver.MotorDown()
+			} else if elevinf.DetermineDirection() == 1 {
+				elevinf.state = UP
+				elevdriver.MotorUp()
+			} else if elevinf.DetermineDirection() == 2 {
 				elevinf.state = IDLE
 			}
 		case NO_EVENT:
@@ -217,36 +217,36 @@ func (elevinf *elevatorinfo) statemachineOpendoor() {
 	
 }
 
-func (elevinf *elevatorinfo) statemachineEmergency() {
+func (elevinf *Elevatorinfo) statemachineEmergency() {
 
 	switch elevinf.event {
 		case ORDER:
 			for i := 0; i < 4; i++{
 				if elevinf.order_slice[i][2] == 1 {
 					elevdriver.ClearStopButton()
-					if DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
+					if elevinf.DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
 						for elevdriver.GetFloor() == -1 {
 							elevdriver.MotorDown()
-							if StopAtCurrentFloor() == 2 {
+							if elevinf.StopAtCurrentFloor() == 2 {
 								elevdriver.MotorStop()
 								elevinf.state = OPEN_DOOR
-								DeleteOrders()
+								elevinf.DeleteOrders()
 								break
 							}
 							if elevdriver.GetStopButton() || elevdriver.GetObs() {
-								StopButtonPushed()
+								elevinf.StopButtonPushed()
 								elevinf.state = EMERGENCY
 								break
 							}
 						}
 						break
 					}
-					if DetermineDirection() == -2 {
+					if elevinf.DetermineDirection() == -2 {
 						elevinf.state = OPEN_DOOR
-					} else if DetermineDirection() == -1 {
+					} else if elevinf.DetermineDirection() == -1 {
 						elevinf.state = DOWN
 						elevdriver.MotorDown()
-					} else if DetermineDirection() == 1 {
+					} else if elevinf.DetermineDirection() == 1 {
 						elevinf.state = UP
 						elevdriver.MotorDown()
 					}

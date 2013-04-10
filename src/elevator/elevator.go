@@ -1,31 +1,33 @@
 
 package elevator
 
-type elevatorinfo struct {
+import "elevdriver"
+
+type Elevatorinfo struct {
 	state State
 	event Event
 	order_slice [][]int
 	last_floor int
-	last_direction Direction
+	last_direction elevdriver.Direction
 }
 
 var N_FLOORS, N_BUTTONS int = 4, 3
 	
-func (elevinf *elevatorinfo) HandleELevator() {
+func (elevinf *Elevatorinfo) HandleElevator() {
 	
-	elevinf.state := IDLE
-	elevinf.event := NO_EVENT
+	elevinf.state = IDLE
+	elevinf.event = NO_EVENT
 	
 	// Order Array
-	elevator.order_slice := make([][]int, N_FLOORS)
-	for i := range(elevator.order_slice){
-		elevator.order_slice[i] = make([]int, N_BUTTONS)
+	elevinf.order_slice = make([][]int, N_FLOORS)
+	for i := range(elevinf.order_slice){
+		elevinf.order_slice[i] = make([]int, N_BUTTONS)
 	}
-	BootStatemachine()
+	elevinf.BootStatemachine()
 	
 	for {
-		UpdateStatemachine()
-		RunStatemachine(event)	
+		elevinf.UpdateStatemachine()
+		elevinf.RunStatemachine()	
 	}
 	
 }

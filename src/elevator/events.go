@@ -13,13 +13,13 @@ const (
 	NO_EVENT
 )
 
-func (elevinf *elevatorinfo) SetEvent(){
+func (elevinf *Elevatorinfo) SetEvent(){
 	
 	if elevdriver.GetStopButton() && elevinf.state != EMERGENCY {
 		elevinf.event = STOP
 	} else if elevdriver.GetObs() {
 		elevinf.event = OBSTRUCTION
-	} else if DetermineDirection(elevinf.last_direction, elevinf.order_slice) != 2 && elevinf.state != UP && elevinf.state != DOWN {
+	} else if elevinf.DetermineDirection() != 2 && elevinf.state != UP && elevinf.state != DOWN {
 		elevinf.event = ORDER
 	} else if elevdriver.GetFloor() != -1 {
 		elevinf.event = SENSOR

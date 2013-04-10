@@ -4,11 +4,11 @@ package elevator
 import "elevdriver"
 import "fmt"
 
-func (elevinf *elevatorinfo) Initiate (){
+func (elevinf *Elevatorinfo) Initiate (){
 	
 	elevdriver.Init()
 	
-	CheckLights()
+	elevinf.CheckLights()
 	
 	elevdriver.MotorDown()
 	
@@ -24,7 +24,7 @@ func (elevinf *elevatorinfo) Initiate (){
 }
 
 // This fucntions checks how many orders are under and above, and returns a number telling where it will go
-func (elevinf *elevatorinfo) DetermineDirection int{
+func (elevinf *Elevatorinfo) DetermineDirection ()(int){
 	
 	current_floor := elevdriver.GetFloor()
 	orders_over := 0
@@ -45,9 +45,9 @@ func (elevinf *elevatorinfo) DetermineDirection int{
 	
 	if orders_at_current > 0 {
 		return -2 //Stay at floor
-	} else if (orders_under > 0 && last_direction == 2) || (orders_under > 0 && orders_over == 0) {
+	} else if (orders_under > 0 && elevinf.last_direction == 2) || (orders_under > 0 && orders_over == 0) {
 		return -1 //Keep going down
-	} else if (orders_over > 0 && last_direction == 1) || (orders_over > 0 && orders_under == 0) {
+	} else if (orders_over > 0 && elevinf.last_direction == 1) || (orders_over > 0 && orders_under == 0) {
 		return 1 //Keep going up
 	} else {
 		return 2 //No orders, no direction
@@ -67,7 +67,7 @@ func StartMotor(direction int)() {
 }
 
 
-func (elevator *elevatorinfo) StopButtonPushed() {
+func (elevator *Elevatorinfo) StopButtonPushed() {
 	
 	elevdriver.SetStopButton()
 	for i := 0; i < 4; i++ {

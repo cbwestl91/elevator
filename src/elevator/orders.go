@@ -6,7 +6,7 @@ import "elevdriver"
 var floor_button int
 var direction_button int
 		
-func (elevinf *elevatorinfo) ReceiveOrders (){
+func (elevinf *Elevatorinfo) ReceiveOrders (){
 	
 	for {
 		floorbutton, directionbutton := elevdriver.GetButton()
@@ -49,9 +49,9 @@ func (elevinf *elevatorinfo) ReceiveOrders (){
 30 emp 31 do4 32 co4
 */
 
-func (elevinf *elevatorinfo) StopAtCurrentFloor(int){
+func (elevinf *Elevatorinfo) StopAtCurrentFloor()(int){
 	
-	var current int = elevinf.GetFloor()
+	var current int = elevdriver.GetFloor()
 	
 	if elevinf.state == UP {
 		for i := 0; i < 3; i = i+2 {
@@ -113,7 +113,7 @@ func (elevinf *elevatorinfo) StopAtCurrentFloor(int){
 		if elevinf.order_slice[current][0] == 1 && orders_below_current == 0{
 			return -1
 		}
-	} else if elevator.state == EMERGENCY {
+	} else if elevinf.state == EMERGENCY {
 		for i := 0; i < 3; i++ {
 			if current == 0 && elevinf.order_slice[0][i] == 1{
 				return 2
@@ -130,7 +130,7 @@ func (elevinf *elevatorinfo) StopAtCurrentFloor(int){
 	return 0
 }
 
-func (elevinf *elevatorinfo) DeleteOrders(){
+func (elevinf *Elevatorinfo) DeleteOrders(){
 	if elevdriver.GetFloor() == 1{
 		for i := 0; i < 3; i++ {
 			elevinf.order_slice[0][i] = 0

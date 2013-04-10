@@ -4,7 +4,7 @@ package elevator
 import "elevdriver"
 
 // checks pressed buttons and set lights accordingly
-func (elevinf *elevatorinfo) CheckLights(){
+func (elevinf *Elevatorinfo) CheckLights (){
 	
 	for {
 		if elevinf.state != EMERGENCY || (elevinf.state == EMERGENCY && elevinf.event == ORDER) {
