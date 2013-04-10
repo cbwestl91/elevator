@@ -9,33 +9,36 @@ import(
 )
 
 func TCPconnectionHandler() {
+	// Umbrella function for TCP part. Goroutines started here
+	go mapOverseer()
+	go listenTCP()
+	
 	for {
 		select {
-		case newIP := <- newIPchan:
-			_, exists := TCPmap[newIP]
-			if !exists {
-				go connectTCP(newIP)
-			} else {
-				fmt.Println("This IP already exists in map.. which is weird")
-			}
-		case deadIP := <- isDeadchan:
-
+		case newIP := <- newIPchan: // new UDP source detected, which means we need a new TCP connection
+			go connectTCP(newIP)			
+		case : // 
 }
 
 // OUTPUTS: TCPmap over GETCURRENTMAP
 //	    TCPmap[wantedIP] over GETSINGLECONN
 // INPUTS:  newMapEntry from UPDATETCPMAP
 //	    deadIP from ISDEADCHAN
-//	    bool from GETCURRENTMAP
-//	    
+//	    bool from GIVEMECURRENTMAP
+//	    wantedIP from GIVEMECONN
 func mapOverseer() {
 	TCPmap := make(map[string]net.Conn)
 	for {
 		select {
 		case newMapEntry := <- updateTCPmap // new entry detected
-			TCPmap[newMapEntry.IP] = newMapEntry.socket
+			_, exists = TCPmap[newMapEntry.IP]
+			if !exists {
+				TCPmap[newMapEntry.IP] = newMapEntry.socket
+			}
 		case deadIP := <- isDeadchan: // someone stopped transmitted UDP, and needs to be removed from map
 			delete(TCPmap, deadIP)
+			// NEED TO STOP LISTENING ON CONNECTION WITH THIS IP
+
 		case <- giveMeCurrentMap: // send function wants full map
 			getCurrentMap <- TCPmap
 		case wantedIP := <- giveMeConn: // if only one connection is wanted

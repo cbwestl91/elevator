@@ -17,6 +17,7 @@ func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of w
 		select{
 			case <- isAlivechan:
 				// IMPLEMENT DEATH TIMER
+				continue
 			case <- time.After(toleratedLosses * sleepduration * time.Millisecond):
 				// remote elevator death detected. TRANSMIT!
 				isDeadchan <- remoteElev
@@ -24,6 +25,8 @@ func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of w
 	}
 }
 
+func deathTimer() {
+	
 
 func sendImAlive() {
 	destination := broadcast + ":" + UDPport
@@ -46,8 +49,6 @@ func sendImAlive() {
 }
 
 func listenImAlive() {
-	fmt.Println(localIP)
-
 	destination := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp", destination)
 	errorhandler(err)
@@ -77,7 +78,7 @@ func listenImAlive() {
 				
 				anotherElev[remoteElev] <- isAlive
 			}
-			IPshareChan <- remoteElev
+			newIPchan <- remoteElev
 		}
 	}
 }

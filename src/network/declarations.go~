@@ -4,6 +4,8 @@ import(
 	"net"
 )
 
+// ALL THIS CHANNEL USE MIGHT BE PRONE TO DEADLOCKS. GOOD IDEA TO IMPLEMENT TIMEOUTS?
+
 const(
 	sleepduration = 1000 //interval between alivemessages given in milliseconds
 	toleratedLosses = 4
@@ -21,7 +23,8 @@ var(
 
 )
 
-var(
+var(	
+
 	updateTCPmap chan TCPconnection // new TCP connections are shared over this channel
 	newIPchan chan string // new IPs broadcasting UDP are shared here
 	isDeadchan chan string // when UDP module detects that someone is dead, their IP is transmitted here
@@ -31,7 +34,9 @@ var(
 	getCurrentMap chan map[string]net.Conn
 	
 	giveMeConn chan string
-	getSingleConn chan TCPconnection
+	getSingleConn chan net.Conn
+	
+	TCPmapUpdates chan bool
 )
 
 type TCPconnection struct { // inputs to map containing active TCP connections are of this type. IP is key, socket is content
