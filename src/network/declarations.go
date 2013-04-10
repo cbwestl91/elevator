@@ -31,7 +31,7 @@ var(
 	getCurrentMap chan map[string]net.Conn
 	
 	giveMeConn chan string
-	getSingleConn chan TCPconnection
+	getSingleConn chan net.Conn
 )
 
 type TCPconnection struct { // inputs to map containing active TCP connections are of this type. IP is key, socket is content
