@@ -4,11 +4,11 @@ package elevator
 import "elevdriver"
 import "fmt"
 
-func Initiate (state State, event Event, order_slice [][]int)(){
+func (elevinf *elevatorinfo) Initiate (){
 	
 	elevdriver.Init()
 	
-	CheckLights(state,event,order_slice)
+	CheckLights()
 	
 	elevdriver.MotorDown()
 	
@@ -24,7 +24,7 @@ func Initiate (state State, event Event, order_slice [][]int)(){
 }
 
 // This fucntions checks how many orders are under and above, and returns a number telling where it will go
-func DetermineDirection(last_direction int, order_slice [][]int)int{
+func (elevinf *elevatorinfo) DetermineDirection int{
 	
 	current_floor := elevdriver.GetFloor()
 	orders_over := 0
@@ -33,11 +33,11 @@ func DetermineDirection(last_direction int, order_slice [][]int)int{
 	
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
-			if order_slice[i][j] == 1 && i < current_floor {
+			if elevinf.order_slice[i][j] == 1 && i < current_floor {
 				orders_under++
-			} else if order_slice[i][j] == 1 && i > current_floor {
+			} else if elevinf.order_slice[i][j] == 1 && i > current_floor {
 				orders_over++
-			} else if order_slice[i][j] == 1 && i == current_floor {
+			} else if elevinf.order_slice[i][j] == 1 && i == current_floor {
 				orders_at_current++
 			}	
 		}
@@ -67,12 +67,12 @@ func StartMotor(direction int)() {
 }
 
 
-func StopButtonPushed(order_slice [][]int)() {
+func (elevator *elevatorinfo) StopButtonPushed() {
 	
 	elevdriver.SetStopButton()
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
-			order_slice[i][j] = 0
+			elevator.order_slice[i][j] = 0
 		}
 	}
 	elevdriver.MotorStop()

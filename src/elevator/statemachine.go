@@ -16,17 +16,15 @@ const (
 	EMERGENCY 
 )
 
-var counter, last_floor, last_direction int
-var N_FLOORS, N_BUTTONS int = 4, 3
-
-func BootStatemachine(state State, event Event, order_slice [][]int){
+func (elevinf *elevatorinfo) BootStatemachine (event Event){
 	
-	last_floor = 0
+	elevinf.last_floor = 0
 	
-	Initiate(state, event, order_slice)
+	Initiate(event)
 	
-	go CheckLights(state, event, order_slice)
-	go ReceiveOrders(state, event, order_slice)
+	go CheckLights()
+	go ReceiveOrders()
+	go SetEvent()
 	go elevdriver.MotorHandler()
 	go elevdriver.Listen()
 }
@@ -43,60 +41,60 @@ func UpdateStatemachine(state State){
 	
 }
 
-func RunStatemachine(state State, event Event, order_slice [][]int){
+func (elevinf *elevatorinfo) RunStatemachine(){
 	
-	switch state {
+	switch elevinf.state {
 		case IDLE:
-			statemachineIdle(state,event,order_slice)
+			statemachineIdle()
 		case UP:
-			statemachineUp(state,event,order_slice)
+			statemachineUp()
 		case DOWN:
-			statemachineDown(state,event,order_slice)
+			statemachineDown()
 		case OPEN_DOOR:
-			statemachineOpendoor(state,event,order_slice)
+			statemachineOpendoor()
 		case EMERGENCY:
-			statemachineEmergency(state,event,order_slice)
+			statemachineEmergency()
 	}
 	
 }
 
-func statemachineIdle(state State, event Event, order_slice [][]int)() {
+func (elevinf *elevatorinfo) statemachineIdle() {
 	
-	switch event {
+	switch elevinf.event {
 		case ORDER:
-			if DetermineDirection(last_direction, order_slice) != 2 && elevdriver.GetFloor() == -1 {
-				Initiate(state, event, order_slice)
-				state = IDLE
+			if DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
+				Initiate()
+				elevinf.state = IDLE
 				break
 			}
-			StartMotor(DetermineDirection(last_direction,order_slice))
-			if DetermineDirection(last_direction, order_slice) == -2 {
-				state = OPEN_DOOR
-			} else if DetermineDirection(last_direction, order_slice) == -1 {
-				state = DOWN
-			} else if DetermineDirection(last_direction, order_slice) == 1 {
+			StartMotor(DetermineDirection())
+			if DetermineDirection() == -2 {
+				elevinf.state = OPEN_DOOR
+			} else if DetermineDirection() == -1 {
+				elevinf.state = DOWN
+			} else if DetermineDirection() == 1 {
 				if elevdriver.GetFloor() == -1 {
-					Initiate(state, event, order_slice)
-					state = IDLE
+					Initiate()
+						elevinf.state = IDLE
 					break
 				}
-				state = UP
+				elevinf.state = UP
 			}
 		case STOP:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case SENSOR:
 		case NO_EVENT:
 	}
 	
 }
 
-func statemachineUp(state State, event Event, order_slice [][]int)() {
+func (elevinf *elevatorinfo) statemachineUp() {
 
-	switch event {
+	switch elevinf.event {
 		case ORDER:
 		case STOP:
 			StopButtonPushed(order_slice)
@@ -120,45 +118,45 @@ func statemachineUp(state State, event Event, order_slice [][]int)() {
 	
 }
 
-func statemachineDown(state State, event Event, order_slice [][]int)() {
+func (elevinf *elevatorinfo) statemachineDown() {
 
-	switch event {
+	switch elevinf.event {
 		case ORDER:
 		case STOP:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case SENSOR:
 			FloorIndicator()
-			if StopAtCurrentFloor(state, order_slice) == -1 {
+			if StopAtCurrentFloor() == -1 {
 				elevdriver.MotorStop()
-				state = OPEN_DOOR
-				DeleteOrders(order_slice)
+				elevinf.state = OPEN_DOOR
+				DeleteOrders()
 				break
 			} else if elevdriver.GetFloor() == 1 {
 				elevdriver.MotorStop()
-				state = IDLE
+				elevinf.state = IDLE
 			}
 		case NO_EVENT:
 	}
 	
 }
 
-func statemachineOpendoor(state State, event Event, order_slice [][]int)() {
+func (elevinf *elevatorinfo) statemachineOpendoor() {
 	
-	switch event {
+	switch elevinf.event {
 		case ORDER:
 			elevdriver.SetDoor()
 			for i := 0; i < 300; i++{
 				if elevdriver.GetFloor() == -1 && elevdriver.GetObs() == false {
 					elevdriver.ClearDoor()
-					state = IDLE
+					elevinf.state = IDLE
 					break
 				} else if elevdriver.GetStopButton() == true {
-					StopButtonPushed(order_slice)
-					state = EMERGENCY
+					StopButtonPushed()
+					elevinf.state = EMERGENCY
 					break
 				}
 				time.Sleep(10*time.Millisecond)
@@ -166,22 +164,22 @@ func statemachineOpendoor(state State, event Event, order_slice [][]int)() {
 					i = 0
 				}
 			}
-			DeleteOrders(order_slice)
+			DeleteOrders()
 			elevdriver.ClearDoor()
-			if DetermineDirection(last_direction,order_slice) == -2 {
-				state = OPEN_DOOR
-			} else if DetermineDirection(last_direction,order_slice) == -1 {
-				state = DOWN
+			if DetermineDirection() == -2 {
+				elevinf.state = OPEN_DOOR
+			} else if DetermineDirection() == -1 {
+				elevinf.state = DOWN
 				elevdriver.MotorDown()
-			} else if DetermineDirection(last_direction,order_slice) == 1 {
-				state = UP
+			} else if DetermineDirection() == 1 {
+				elevinf.state = UP
 				elevdriver.MotorUp()
-			} else if DetermineDirection(last_direction,order_slice) == 2 {
-				state = IDLE
+			} else if DetermineDirection() == 2 {
+				elevinf.state = IDLE
 			}
 		case STOP:
-			StopButtonPushed(order_slice)
-			state = EMERGENCY
+			StopButtonPushed()
+			elevinf.state = EMERGENCY
 		case OBSTRUCTION:
 		case SENSOR:
 			fmt.Printf("Elevator reached floor %d\n", elevdriver.GetFloor())
@@ -189,11 +187,11 @@ func statemachineOpendoor(state State, event Event, order_slice [][]int)() {
 			for i := 0; i < 300; i++{
 				if elevdriver.GetFloor() == -1 && elevdriver.GetObs() == false {
 					elevdriver.ClearDoor()
-					state = IDLE
+					elevinf.state = IDLE
 					break
 				} else if elevdriver.GetStopButton() == true {
-					StopButtonPushed(order_slice)
-					state = EMERGENCY
+					StopButtonPushed()
+					elevinf.state = EMERGENCY
 					break
 				}
 				time.Sleep(10*time.Millisecond)
@@ -201,55 +199,55 @@ func statemachineOpendoor(state State, event Event, order_slice [][]int)() {
 					i = 0
 				}
 			}
-			DeleteOrders(order_slice)
+			DeleteOrders()
 			elevdriver.ClearDoor()
-			if DetermineDirection(last_direction,order_slice) == -2 {
-				state = OPEN_DOOR
-			} else if DetermineDirection(last_direction,order_slice) == -1 {
+			if DetermineDirection() == -2 {
+				elevinf.state = OPEN_DOOR
+			} else if DetermineDirection() == -1 {
 				state = DOWN
-				elevdriver.MotorDown()
-			} else if DetermineDirection(last_direction,order_slice) == 1 {
+				elevinf.elevdriver.MotorDown()
+			} else if DetermineDirection() == 1 {
 				state = UP
-				elevdriver.MotorUp()
-			} else if DetermineDirection(last_direction,order_slice) == 2 {
-				state = IDLE
+				elevinf.elevdriver.MotorUp()
+			} else if DetermineDirection() == 2 {
+				elevinf.state = IDLE
 			}
 		case NO_EVENT:
 	}
 	
 }
 
-func statemachineEmergency(state State, event Event, order_slice [][]int)() {
+func (elevinf *elevatorinfo) statemachineEmergency() {
 
-	switch event {
+	switch elevinf.event {
 		case ORDER:
 			for i := 0; i < 4; i++{
-				if order_slice[i][2] == 1 {
+				if elevinf.order_slice[i][2] == 1 {
 					elevdriver.ClearStopButton()
-					if DetermineDirection(last_direction, order_slice) != 2 && elevdriver.GetFloor() == -1 {
+					if DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
 						for elevdriver.GetFloor() == -1 {
 							elevdriver.MotorDown()
-							if StopAtCurrentFloor(state,order_slice) == 2 {
+							if StopAtCurrentFloor() == 2 {
 								elevdriver.MotorStop()
-								state = OPEN_DOOR
-								DeleteOrders(order_slice)
+								elevinf.state = OPEN_DOOR
+								DeleteOrders()
 								break
 							}
 							if elevdriver.GetStopButton() || elevdriver.GetObs() {
-								StopButtonPushed(order_slice)
-								state = EMERGENCY
+								StopButtonPushed()
+								elevinf.state = EMERGENCY
 								break
 							}
 						}
 						break
 					}
-					if DetermineDirection(last_direction, order_slice) == -2 {
-						state = OPEN_DOOR
-					} else if DetermineDirection(last_direction, order_slice) == -1 {
-						state = DOWN
+					if DetermineDirection() == -2 {
+						elevinf.state = OPEN_DOOR
+					} else if DetermineDirection() == -1 {
+						elevinf.state = DOWN
 						elevdriver.MotorDown()
-					} else if DetermineDirection(last_direction, order_slice) == 1 {
-						state = UP
+					} else if DetermineDirection() == 1 {
+						elevinf.state = UP
 						elevdriver.MotorDown()
 					}
 				}
@@ -261,34 +259,4 @@ func statemachineEmergency(state State, event Event, order_slice [][]int)() {
 	}
 	
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
