@@ -53,3 +53,4 @@ type commChannels struct { // collection of channels used for TCP communication
 type message struct { // messages sent over TCP are converted to this type, before being transmitted over channels
 	IP string
 	content []byte
+}

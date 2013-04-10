@@ -6,6 +6,7 @@ import(
 	"fmt"
 	"net"
 	"strings"
+	"time"
 )
 
 func TCPconnectionHandler(communicator commChannels) {
@@ -18,7 +19,7 @@ func TCPconnectionHandler(communicator commChannels) {
 		select {
 		case newIP := <- newIPchan: // new UDP source detected, which means we need a new TCP connection			
 			go connectTCP(newIP)
-		case : conn <- startNewReceivechan: //
+		case conn := <- startNewReceivechan: //
 			conn.receiveTCP(communicator)
 		}
 	}
@@ -34,8 +35,8 @@ func mapOverseer() {
 	TCPmap := make(map[string]net.Conn)
 	for {
 		select {
-		case newMapEntry := <- updateTCPmap // new entry detected
-			_, exists = TCPmap[newMapEntry.IP]
+		case newMapEntry := <- updateTCPmap: // new entry detected
+			_, exists := TCPmap[newMapEntry.IP]
 			if !exists {
 				TCPmap[newMapEntry.IP] = newMapEntry.socket
 				startNewReceivechan <- newMapEntry
@@ -86,11 +87,11 @@ func listenTCP(){ // listens for TCP connections
 // OUTPUTS: newMapEntry over UPDATETCPMAP
 func connectTCP(remoteIP string) {
 	service := remoteIP + ":" + TCPport
-	addr, err := net.ResolveTCPAddr("tcp4", service)
+	_, err := net.ResolveTCPAddr("tcp4", service)
 	if err != nil {
 		fmt.Println("error resolving TCP adress")
 	} else {
-		conn, err := net.Dial("tcp4", addr)
+		conn, err := net.Dial("tcp4", service)
 		// As of now, this function might fight with listenTCP()
 
 		if err != nil {
@@ -111,7 +112,7 @@ func connectTCP(remoteIP string) {
 func sendTCP(communicator commChannels){ 
 	for { // communication is done over channels, so function should never return
 		select {
-			case: message := <- communicator.sendToAll:
+			case message := <- communicator.sendToAll:
 				fmt.Println("Sending message to all")
 				giveMeCurrentMap <- true
 				TCPmap := <- getCurrentMap
@@ -126,13 +127,13 @@ func sendTCP(communicator commChannels){
 					}
 				}
 
-			case: message := <- communicator.sendToOne:
+			case message := <- communicator.sendToOne:
 				fmt.Println("Sending message to one")
 				giveMeConn <- message.IP
 				socket := <- getSingleConn
 				// NEED ERROR CHECK HERE ASWELL
 				socket.Write(message.content)
-				fmt.Println("message successfully sent to %s", input.IP)
+				fmt.Println("message successfully sent to %s", message.IP)
 		}
 	}
 }
@@ -148,7 +149,7 @@ func (conn TCPconnection) receiveTCP(communicator commChannels){
 		} else {
 			newMessage := message{conn.IP, msg[0:n]}
 			fmt.Println("New message has been received")
-			messageReceivedchan <- newMessage
+			communicator.messageReceivedchan <- newMessage
 		}
 	}
 }

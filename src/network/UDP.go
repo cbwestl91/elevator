@@ -7,7 +7,6 @@ import(
 	"fmt"
 	"net"
 	"time"
-	"strings"
 	"os"
 )
 
@@ -25,7 +24,7 @@ func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of w
 	}
 }	
 
-func sendImAlive() {
+func SendImAlive() {
 	service := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
@@ -45,7 +44,7 @@ func sendImAlive() {
 	}
 }
 
-func listenImAlive() {
+func ListenImAlive() {
 	service := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)

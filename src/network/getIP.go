@@ -1,7 +1,6 @@
 package network
 
 import(
-	"strings"
 	"net"
 	"os"
 	"fmt"
@@ -19,9 +18,9 @@ func getMyIP() string{
 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
 			temp := ipnet.IP.String() // net.IsGlobalUnicast()?
 			return temp
-			}
 		}
 	}
+	return "SOMETHING WENT WRONG"
 }
 
 /*
