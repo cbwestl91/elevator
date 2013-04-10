@@ -9,25 +9,25 @@ func (elevinf *Elevatorinfo) CheckLights (){
 	for {
 		if elevinf.state != EMERGENCY || (elevinf.state == EMERGENCY && elevinf.event == ORDER) {
 			for i := 0; i < 3; i++ {
-				if elevinf.order_slice[i][0] == 1 {
+				if elevinf.internal_orders[i][0] == 1 {
 					elevdriver.SetLight(i, 1)
-				} else if elevinf.order_slice[i][0] == 0 {
+				} else if elevinf.internal_orders[i][0] == 0 {
 					elevdriver.ClearLight(i, 1)
 				}
 			}
 			for i := 1; i < 4; i++ {
-				if elevinf.order_slice[i][0] == 1 {
+				if elevinf.internal_orders[i][0] == 1 {
 					elevdriver.SetLight(i, 2)
-				} else if elevinf.order_slice[i][0] == 0 {
+				} else if elevinf.internal_orders[i][0] == 0 {
 					elevdriver.ClearLight(i, 2)
 				}
 			}
 		}
 	
 		for i := 0; i < 4; i++ {
-			if elevinf.order_slice[i][2] == 1 {
+			if elevinf.internal_orders[i][2] == 1 {
 				elevdriver.SetLight(i, 0)
-			} else if elevinf.order_slice[i][2] == 0 {
+			} else if elevinf.internal_orders[i][2] == 0 {
 				elevdriver.ClearLight(i, 0)
 			}
 		}

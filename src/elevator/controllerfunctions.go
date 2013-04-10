@@ -33,11 +33,11 @@ func (elevinf *Elevatorinfo) DetermineDirection ()(int){
 	
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
-			if elevinf.order_slice[i][j] == 1 && i < current_floor {
+			if elevinf.internal_orders[i][j] == 1 && i < current_floor {
 				orders_under++
-			} else if elevinf.order_slice[i][j] == 1 && i > current_floor {
+			} else if elevinf.internal_orders[i][j] == 1 && i > current_floor {
 				orders_over++
-			} else if elevinf.order_slice[i][j] == 1 && i == current_floor {
+			} else if elevinf.internal_orders[i][j] == 1 && i == current_floor {
 				orders_at_current++
 			}	
 		}
@@ -75,7 +75,7 @@ func (elevator *Elevatorinfo) StopButtonPushed() {
 	fmt.Printf("Stop button has been pushed\n")
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
-			elevator.order_slice[i][j] = 0
+			elevator.internal_orders[i][j] = 0
 		}
 	}
 	elevdriver.MotorStop()

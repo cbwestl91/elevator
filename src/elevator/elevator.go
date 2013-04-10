@@ -6,7 +6,8 @@ import "elevdriver"
 type Elevatorinfo struct {
 	state State
 	event Event
-	order_slice [][]int
+	internal_orders [][]int
+	external_orders [][]int
 	last_floor int
 	last_direction elevdriver.Direction
 }
@@ -18,11 +19,16 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	elevinf.state = IDLE
 	elevinf.event = NO_EVENT
 	
-	// Order Array
-	elevinf.order_slice = make([][]int, N_FLOORS)
-	for i := range(elevinf.order_slice){
-		elevinf.order_slice[i] = make([]int, N_BUTTONS)
+	// Order Arrays
+	elevinf.internal_orders = make([][]int, N_FLOORS)
+	for i := range(elevinf.internal_orders){
+		elevinf.internal_orders[i] = make([]int, N_BUTTONS)
 	}
+	elevinf.external_orders = make([][]int, N_FLOORS)
+	for i := range(elevinf.internal_orders){
+		elevinf.external_orders[i] = make([]int, N_BUTTONS-1)
+	}
+	
 	elevinf.BootStatemachine()
 	
 	for {

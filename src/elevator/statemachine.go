@@ -225,7 +225,7 @@ func (elevinf *Elevatorinfo) statemachineEmergency() {
 	switch elevinf.event {
 		case ORDER:
 			for i := 0; i < 4; i++{
-				if elevinf.order_slice[i][2] == 1 {
+				if elevinf.internal_orders[i][2] == 1 {
 					elevdriver.ClearStopButton()
 					if elevinf.DetermineDirection() != 2 && elevdriver.GetFloor() == -1 {
 						for elevdriver.GetFloor() == -1 {
