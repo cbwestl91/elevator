@@ -26,11 +26,11 @@ func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of w
 }	
 
 func sendImAlive() {
-	destination := broadcast + ":" + UDPport
-	addr, err := net.ResolveUDPAddr("udp", destination)
+	service := broadcast + ":" + UDPport
+	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
 
-	isaliveconn, err := net.DialUDP("udp", nil, addr)
+	isaliveconn, err := net.DialUDP("udp4", nil, addr)
 	errorhandler(err)
 	
 	isaliveMessage := []byte("1")
@@ -46,11 +46,11 @@ func sendImAlive() {
 }
 
 func listenImAlive() {
-	destination := broadcast + ":" + UDPport
-	addr, err := net.ResolveUDPAddr("udp", destination)
+	service := broadcast + ":" + UDPport
+	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
 
-	isaliveconn, err := net.ListenUDP("udp", addr)
+	isaliveconn, err := net.ListenUDP("udp4", addr)
 	errorhandler(err)
 
 	var data [512]byte

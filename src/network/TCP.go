@@ -8,16 +8,20 @@ import(
 	"strings"
 )
 
-func TCPconnectionHandler() {
+func TCPconnectionHandler(communicator commChannels) {
 	// Umbrella function for TCP part. Goroutines started here
 	go mapOverseer()
 	go listenTCP()
+	go sendTCP(communicator)	
 	
 	for {
 		select {
-		case newIP := <- newIPchan: // new UDP source detected, which means we need a new TCP connection
-			go connectTCP(newIP)			
-		case : // 
+		case newIP := <- newIPchan: // new UDP source detected, which means we need a new TCP connection			
+			go connectTCP(newIP)
+		case : conn <- startNewReceivechan: //
+			conn.receiveTCP(communicator)
+		}
+	}
 }
 
 // OUTPUTS: TCPmap over GETCURRENTMAP
@@ -34,10 +38,11 @@ func mapOverseer() {
 			_, exists = TCPmap[newMapEntry.IP]
 			if !exists {
 				TCPmap[newMapEntry.IP] = newMapEntry.socket
+				startNewReceivechan <- newMapEntry
 			}
-		case deadIP := <- isDeadchan: // someone stopped transmitted UDP, and needs to be removed from map
+		case deadIP := <- isDeadchan: // someone stopped transmitting UDP, and needs to be removed from map
 			delete(TCPmap, deadIP)
-			// NEED TO STOP LISTENING ON CONNECTION WITH THIS IP
+			// NEED TO STOP RECEIVING ON CONNECTION WITH THIS IP
 
 		case <- giveMeCurrentMap: // send function wants full map
 			getCurrentMap <- TCPmap
@@ -49,23 +54,23 @@ func mapOverseer() {
 
 // OUTPUTS: newMapEntry over UPDATETCPMAP
 func listenTCP(){ // listens for TCP connections 
-	destination := ":" + TCPport
-	addr, err := net.ResolveTCPAddr("tcp", destination)
+	service := ":" + TCPport
+	addr, err := net.ResolveTCPAddr("tcp4", service)
 	if err != nil {
 		fmt.Println("error resolving TCP adress")
 	} else {
-		for {
-			listener, err := net.ListenTCP("tcp", addr)
-			fmt.Println("listening for new TCP connections")
-			if err != nil {
-				fmt.Println("error listening for TCP connections")
-			} else {
+		listener, err := net.ListenTCP("tcp4", addr)
+		fmt.Println("listening for new TCP connections")
+		if err != nil {
+			fmt.Println("error listening for TCP connections")
+		} else {
+			for {
 				socket, err := listener.Accept()
 				if err != nil {
 					fmt.Println("error accepting TCP connection")
 				} else {
 					remoteElevAddr := socket.RemoteAddr().String()
-				
+			
 					remoteElevSplitter := strings.Split(remoteElevAddr, ":")
 					remoteElevIP := remoteElevSplitter[0]
 					newMapEntry := TCPconnection{socket, remoteElevIP}
@@ -80,20 +85,20 @@ func listenTCP(){ // listens for TCP connections
 
 // OUTPUTS: newMapEntry over UPDATETCPMAP
 func connectTCP(remoteIP string) {
-	destination := remoteIP + ":" + TCPport
-	addr, err := net.ResolveTCPAddr("tcp", destination)
+	service := remoteIP + ":" + TCPport
+	addr, err := net.ResolveTCPAddr("tcp4", service)
 	if err != nil {
 		fmt.Println("error resolving TCP adress")
-	}
-	conn, err := net.DialTCP("tcp", nil, addr)
-	// As of now, this function might fight with listenTCP()
-
-	if err != nil {
-		fmt.Println("error dialing TCP")
-		
 	} else {
-		newMapEntry := TCPconnection{conn, remoteIP}
-		updateTCPmap <- newMapEntry
+		conn, err := net.Dial("tcp4", addr)
+		// As of now, this function might fight with listenTCP()
+
+		if err != nil {
+			fmt.Println("error dialing TCP")
+		} else {
+			newMapEntry := TCPconnection{conn, remoteIP}
+			updateTCPmap <- newMapEntry
+		}
 	}
 }
 
@@ -106,7 +111,8 @@ func connectTCP(remoteIP string) {
 func sendTCP(communicator commChannels){ 
 	for { // communication is done over channels, so function should never return
 		select {
-			case: input := <- communicator.sendToAll:
+			case: message := <- communicator.sendToAll:
+				fmt.Println("Sending message to all")
 				giveMeCurrentMap <- true
 				TCPmap := <- getCurrentMap
 				if TCPmap == nil {
@@ -114,16 +120,18 @@ func sendTCP(communicator commChannels){
 				} else {
 					for ip := range TCPmap {
 						socket := TCPmap[ip]
-						socket.Write(input.content)
+						socket.SetWriteDeadline(time.Now().Add(300*time.Millisecond))
+						socket.Write(message.content)
 						fmt.Println("message successfully sent to %s", ip)
 					}
 				}
 
-			case: input := <- communicator.sendToOne:
-				giveMeConn <- input.IP
+			case: message := <- communicator.sendToOne:
+				fmt.Println("Sending message to one")
+				giveMeConn <- message.IP
 				socket := <- getSingleConn
 				// NEED ERROR CHECK HERE ASWELL
-				socket.Write(input.content)
+				socket.Write(message.content)
 				fmt.Println("message successfully sent to %s", input.IP)
 		}
 	}
@@ -133,11 +141,12 @@ func sendTCP(communicator commChannels){
 func (conn TCPconnection) receiveTCP(communicator commChannels){
 	var msg [512]byte
 	for {
-		_, err := conn.socket.Read(msg[0:])
+		n, err := conn.socket.Read(msg[0:])
 		if err != nil {
 			fmt.Println("error receiving on TCP connection: %s", conn.IP)
+			return
 		} else {
-			newMessage := message{conn.IP, msg[0:]}
+			newMessage := message{conn.IP, msg[0:n]}
 			fmt.Println("New message has been received")
 			messageReceivedchan <- newMessage
 		}
