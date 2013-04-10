@@ -26,7 +26,7 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	elevinf.BootStatemachine()
 	
 	for {
-		elevinf.UpdateStatemachine()
+		elevinf.UpdateLastDirection()
 		elevinf.RunStatemachine()	
 	}
 	

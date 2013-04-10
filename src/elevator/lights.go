@@ -40,6 +40,7 @@ func FloorIndicator(){
 
 	if elevdriver.GetFloor()  > 0 { 
 		elevdriver.SetFloor(elevdriver.GetFloor())
+		fmt.Printf("Floor detected"\n)
 	}
 	
 }

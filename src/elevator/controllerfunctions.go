@@ -61,8 +61,10 @@ func StartMotor(direction int)() {
 	
 	if direction == -1 {
 		elevdriver.MotorDown()
+		fmt.Printf("Elevator going down\n")
 	} else if direction == 1 {
 		elevdriver.MotorUp()
+		fmt.Printf("Elevator going up\n")
 	}
 }
 
@@ -70,6 +72,7 @@ func StartMotor(direction int)() {
 func (elevator *Elevatorinfo) StopButtonPushed() {
 	
 	elevdriver.SetStopButton()
+	fmt.Printf("Stop button has been pushed\n")
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
 			elevator.order_slice[i][j] = 0

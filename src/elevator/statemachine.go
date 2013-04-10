@@ -17,7 +17,7 @@ const (
 )
 
 func (elevinf *Elevatorinfo) BootStatemachine (){
-	
+	fmt.Printf("STATEMACHINE BOOTING...\n")
 	elevinf.last_floor = 0
 	
 	elevinf.Initiate()
@@ -27,9 +27,11 @@ func (elevinf *Elevatorinfo) BootStatemachine (){
 	go elevinf.SetEvent()
 	go elevdriver.MotorHandler()
 	go elevdriver.Listen()
+	
+	fmt.Printf("STATEMACHINE BOOTED\n")
 }
 
-func (elevinf *Elevatorinfo) UpdateStatemachine(){
+func (elevinf *Elevatorinfo) UpdateLastDirection(){
 	
 	if elevinf.state == UP{
 		elevinf.last_direction = 1
@@ -38,7 +40,6 @@ func (elevinf *Elevatorinfo) UpdateStatemachine(){
 	}
 		
 	FloorIndicator()
-	
 }
 
 func (elevinf *Elevatorinfo) RunStatemachine(){
@@ -148,6 +149,7 @@ func (elevinf *Elevatorinfo) statemachineOpendoor() {
 	
 	switch elevinf.event {
 		case ORDER:
+			fmt.Printf("The door is open\n")
 			elevdriver.SetDoor()
 			for i := 0; i < 300; i++{
 				if elevdriver.GetFloor() == -1 && elevdriver.GetObs() == false {
@@ -161,6 +163,7 @@ func (elevinf *Elevatorinfo) statemachineOpendoor() {
 				}
 				time.Sleep(10*time.Millisecond)
 				if elevdriver.GetObs() == true {
+					fmt.Printf("Obstruction detected, door staying open\n")
 					i = 0
 				}
 			}
