@@ -42,6 +42,7 @@ type TCPconnection struct { // inputs to map containing active TCP connections a
 type commChannels struct { // collection of channels used for TCP communication
 	sendToAll chan message
 	sendToOne chan message
+	messageReceivedchan chan message
 }
 
 type message struct { // messages sent over TCP are converted to this type, before being transmitted over channels
