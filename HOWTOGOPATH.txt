@@ -1,0 +1,2 @@
+export GOPATH="$HOME/g12/elevator"
+export PATH="$HOME/g12/elevator/bin:$PATH"
