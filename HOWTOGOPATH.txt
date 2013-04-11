@@ -1,2 +1,2 @@
-export GOPATH="$HOME/g12/elevator"
-export PATH="$HOME/g12/elevator/bin:$PATH"
+export GOPATH="$HOME/gruppe12/elevator"
+export PATH="$HOME/gruppe12/elevator/bin:$PATH"

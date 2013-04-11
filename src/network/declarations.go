@@ -23,7 +23,7 @@ var(
 
 )
 
-var(	
+var(
 
 	updateTCPmap chan TCPconnection // new TCP connections are shared over this channel
 	newIPchan chan string // new IPs broadcasting UDP are shared here
