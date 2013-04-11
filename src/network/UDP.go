@@ -59,7 +59,6 @@ func listenImAlive() {
 		fmt.Println("network.ListenImAlive() --> reading from UDP")
 		_, senderAddr, err := isaliveconn.ReadFromUDP(data[0:])
 		errorhandler(err)
-		fmt.Println("UDP CONN RECEIVED SUCCESSFULLY")
 		if localIP != senderAddr.IP.String(){ // makes sure we don't pick up packets from ourselves
 			fmt.Println("ImAlive message received")
 			
