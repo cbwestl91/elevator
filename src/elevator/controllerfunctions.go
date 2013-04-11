@@ -9,14 +9,14 @@ func (elevinf *Elevatorinfo) Initiate (){
 	elevdriver.Init()
 	fmt.Printf("1\n")
 	fmt.Printf("2\n")
-	elevdriver.MotorDown()
+	go elevdriver.MotorDown()
 	fmt.Printf("3\n")
 	for elevdriver.GetFloor() == -1 {}
 	
 	elevdriver.SetFloor(elevdriver.GetFloor())
 	
-	elevdriver.MotorUp()
-	elevdriver.MotorStop()
+	go elevdriver.MotorUp()
+	go elevdriver.MotorStop()
 	
 	fmt.Printf("Elevator initiation complete!\n")
 	

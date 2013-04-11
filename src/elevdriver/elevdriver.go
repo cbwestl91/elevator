@@ -56,7 +56,9 @@ var obsChan chan bool
 func MotorHandler() {
 	currentDir := NONE
 	Write_analog(MOTOR, MIN_SPEED)
+	fmt.Printf("MotorHandler ready...\n")
 	for {
+		fmt.Printf("Waiting for newDir\n")
 		newDir := <- motorChan
 		fmt.Printf("newDir received\n")
 		if (newDir == NONE) && (currentDir == UP) {
@@ -234,8 +236,9 @@ func MotorUp () {
 }
 
 func MotorDown () {
-	fmt.Printf("MOTORDOWNGOGOGO\n")
+	fmt.Printf("You are now inside MotorDown...\n")
 	motorChan <- DOWN
+	fmt.Printf("newDir sent...\n")
 }
 
 func MotorStop () {
