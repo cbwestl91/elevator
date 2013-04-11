@@ -15,11 +15,11 @@ const(
 )
 
 var(
-	localIP = getMyIP()
+	localIP = getIP()
 	broadcast = "235.241.187.255" //må se nærmere på adressen
 	
-	UDPport = "9119" // randomly chosen ports
-	TCPport = " 9120"
+	UDPport = "8165" // randomly chosen ports
+	TCPport = "8166"
 
 )
 

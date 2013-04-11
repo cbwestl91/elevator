@@ -148,8 +148,7 @@ func (conn TCPconnection) receiveTCP(communicator commChannels){
 	for {
 		n, err := conn.socket.Read(msg[0:])
 		if err != nil {
-			fmt.Println("error receiving on TCP connection: ", conn.IP, " error message: " err)
-			return
+			fmt.Println("error receiving on TCP connection: error message: %s", err)
 		} else {
 			newMessage := message{conn.IP, msg[0:n]}
 			fmt.Println("New message has been received")
