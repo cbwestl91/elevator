@@ -35,6 +35,8 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 		// Clearing the unused spaces
 		elevinf.internal_orders[3][0] = 0
 		elevinf.internal_orders[0][1] = 0
+		elevinf.external_orders[3][0] = 0
+		elevinf.external_orders[0][1] = 0
 		
 		floorbutton = 0
 		directionbutton = 0

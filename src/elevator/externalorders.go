@@ -7,21 +7,31 @@ import "network"
 
 func (elevinf *Elevatorinfo) ExternalOrderDetector () {
 
-	var checker int = 0
+	var checker, pos_one, pos_two, order_int int = 0, 0, 0
 	
 	for { //Checking for "own" external orders
 		for i := 0; i < 4; i++ {
 			for j := 0; j < 2; j++ {
 					if elevinf.external_orders[i][j] == 1 {
 						checker++
+						if checker > 0 {
+							pos_one = i
+							pos_two = j
+							break
+						}
 					}
+				if checker > 0 {
+					break
+				}
 			}
 		}
 		
-		if checker > 0  { // External order detected!
-			
+		if checker == 1  { // External order detected!
+			order_int = OrderEncoder(pos_one,pos_two)
 		}
 		checker = 0
+		pos_one = 0
+		pos_two = 0
 	}
 	
 }
@@ -58,3 +68,47 @@ func (elevinf *Elevatorinfo) ExternalOrderTimer () {
 // external_orders har kun verdien 1 idet den blir oppdaget
 // må ha en annen verdi f.eks -1 mens orderen kjøres i en 
 // intern heis
+
+func (elevinf *Elevatorinfo) OrderEncoder (a int, b int)(c int){
+	if a = 0 && b = 0 {
+		c = 0
+	}
+	else if a = 1 && b = 0{
+		c = 1
+	}
+	else if a = 2 && b = 0{
+		c = 2
+	}
+	else if a = 1 && b = 1{
+		c = 3
+	}
+	else if a = 2 && b = 1{
+		c = 4
+	}
+	else if a = 3 && b = 1{
+		c = 5
+	}
+	return c
+}
+
+func (elevinf *Elevatorinfo) OrderDecoder (c int)(a int, b int){
+	if c = 0 {
+		a,b = 0,0
+	}
+	else if c = 1 {
+		a,b = 1,0
+	}
+	else if c = 2 {
+		a,b = 2,0
+	}
+	else if c = 3 {
+		a,b = 1,1
+	}
+	else if c = 4 {
+		a,b = 2,1
+	}
+	else if c = 5 {
+		a,b = 3,1
+	}
+	return a,b
+}
