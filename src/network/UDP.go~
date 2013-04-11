@@ -7,7 +7,6 @@ import(
 	"fmt"
 	"net"
 	"time"
-	"strings"
 	"os"
 )
 
@@ -25,9 +24,9 @@ func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of w
 	}
 }	
 
-func sendImAlive() {
-	destination := broadcast + ":" + UDPport
-	addr, err := net.ResolveUDPAddr("udp4", destination)
+func SendImAlive() {
+	service := broadcast + ":" + UDPport
+	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
 
 	isaliveconn, err := net.DialUDP("udp4", nil, addr)
@@ -45,9 +44,9 @@ func sendImAlive() {
 	}
 }
 
-func listenImAlive() {
-	destination := broadcast + ":" + UDPport
-	addr, err := net.ResolveUDPAddr("udp4", destination)
+func ListenImAlive() {
+	service := broadcast + ":" + UDPport
+	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
 
 	isaliveconn, err := net.ListenUDP("udp4", addr)
@@ -57,9 +56,10 @@ func listenImAlive() {
 	anotherElev := make(map[string]chan int)
 
 	for {
+		fmt.Println("network.ListenImAlive() --> reading from UDP")
 		_, senderAddr, err := isaliveconn.ReadFromUDP(data[0:])
 		errorhandler(err)
-		
+		fmt.Println("UDP CONN RECEIVED SUCCESSFULLY")
 		if localIP != senderAddr.IP.String(){ // makes sure we don't pick up packets from ourselves
 			fmt.Println("ImAlive message received")
 			

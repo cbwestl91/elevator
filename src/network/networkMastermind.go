@@ -28,12 +28,12 @@ func (commChan *commChannels) commChaninit() {
 	commChan.messageReceivedchan = make(chan message)
 	fmt.Println("communicator initialized")
 }
-/*
+
 func UDPinit() {
 	go sendImAlive()
 	go listenImAlive()
 }
-*/
+
 func TCPinit() {
 	communicator := commChannels{}
 	communicator.commChaninit()

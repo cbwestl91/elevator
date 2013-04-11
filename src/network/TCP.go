@@ -63,7 +63,7 @@ func listenTCP(){ // listens for TCP connections
 		listener, err := net.ListenTCP("tcp4", addr)
 		fmt.Println("listening for new TCP connections")
 		if err != nil {
-			fmt.Println("error listening for TCP connections")
+			fmt.Println("error listening for TCP connections: ", err)
 		} else {
 			for {
 				socket, err := listener.Accept()
@@ -122,8 +122,12 @@ func sendTCP(communicator commChannels){
 					for ip := range TCPmap {
 						socket := TCPmap[ip]
 						socket.SetWriteDeadline(time.Now().Add(300*time.Millisecond))
-						socket.Write(message.content)
-						fmt.Println("message successfully sent to %s", ip)
+						_, err := socket.Write(message.content)
+						if err != nil {
+							fmt.Println("error sending on all TCP conns: ", err)
+						} else {
+							fmt.Println("message successfully sent to %s", ip)
+						}
 					}
 				}
 
@@ -144,7 +148,7 @@ func (conn TCPconnection) receiveTCP(communicator commChannels){
 	for {
 		n, err := conn.socket.Read(msg[0:])
 		if err != nil {
-			fmt.Println("error receiving on TCP connection: %s", conn.IP)
+			fmt.Println("error receiving on TCP connection: ", conn.IP, " error message: " err)
 			return
 		} else {
 			newMessage := message{conn.IP, msg[0:n]}

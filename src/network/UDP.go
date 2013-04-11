@@ -24,7 +24,7 @@ func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of w
 	}
 }	
 
-func SendImAlive() {
+func sendImAlive() {
 	service := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
@@ -44,7 +44,7 @@ func SendImAlive() {
 	}
 }
 
-func ListenImAlive() {
+func listenImAlive() {
 	service := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp4", service)
 	errorhandler(err)
@@ -56,9 +56,10 @@ func ListenImAlive() {
 	anotherElev := make(map[string]chan int)
 
 	for {
+		fmt.Println("network.ListenImAlive() --> reading from UDP")
 		_, senderAddr, err := isaliveconn.ReadFromUDP(data[0:])
 		errorhandler(err)
-		
+		fmt.Println("UDP CONN RECEIVED SUCCESSFULLY")
 		if localIP != senderAddr.IP.String(){ // makes sure we don't pick up packets from ourselves
 			fmt.Println("ImAlive message received")
 			
