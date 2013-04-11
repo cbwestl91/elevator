@@ -18,7 +18,7 @@ const (
 
 func (elevinf *Elevatorinfo) BootStatemachine (){
 	fmt.Printf("STATEMACHINE BOOTING...\n")
-	elevinf.last_floor = 0
+	elevinf.l  ast_floor = 0
 	
 	elevinf.Initiate()
 	
