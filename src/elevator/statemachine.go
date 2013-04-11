@@ -20,13 +20,15 @@ func (elevinf *Elevatorinfo) BootStatemachine (){
 	fmt.Printf("STATEMACHINE BOOTING...\n")
 	elevinf.last_floor = 0
 	
+	go elevdriver.MotorHandler()
+	go elevdriver.Listen()
+	
 	elevinf.Initiate()
 	
 	go elevinf.CheckLights()
 	go elevinf.ReceiveOrders()
 	go elevinf.SetEvent()
-	go elevdriver.MotorHandler()
-	go elevdriver.Listen()
+	
 	
 	fmt.Printf("STATEMACHINE BOOTED\n")
 }

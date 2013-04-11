@@ -1,11 +1,9 @@
 
 package elevator
 
-import "network"
-
-func (elevinf *Elevatorinfo) ExternalOrderDetector {
+func (elevinf *Elevatorinfo) ExternalOrderDetector () {
 	
-	checker int := 0
+	var checker int = 0
 	
 	for {
 		//Checking for "own" external orders

@@ -43,9 +43,8 @@ func Init() {
 	motorChan = make(chan Direction)
 	stopButtonChan = make(chan bool)
 	obsChan = make(chan bool)
-
-	go Listen()
-	go MotorHandler()
+	
+	fmt.Printf("I made it!\n")
 }
 
 var buttonChan chan button
@@ -59,6 +58,7 @@ func MotorHandler() {
 	Write_analog(MOTOR, MIN_SPEED)
 	for {
 		newDir := <- motorChan
+		fmt.Printf("newDir received\n")
 		if (newDir == NONE) && (currentDir == UP) {
 			Set_bit(MOTORDIR)
 			Write_analog(MOTOR, MIN_SPEED)
@@ -234,6 +234,7 @@ func MotorUp () {
 }
 
 func MotorDown () {
+	fmt.Printf("MOTORDOWNGOGOGO\n")
 	motorChan <- DOWN
 }
 

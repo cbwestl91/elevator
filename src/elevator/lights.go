@@ -2,6 +2,7 @@
 package elevator
 
 import "elevdriver"
+import "fmt"
 
 // checks pressed buttons and set lights accordingly
 func (elevinf *Elevatorinfo) CheckLights (){
@@ -40,7 +41,7 @@ func FloorIndicator(){
 
 	if elevdriver.GetFloor()  > 0 { 
 		elevdriver.SetFloor(elevdriver.GetFloor())
-		fmt.Printf("Floor detected"\n)
+		fmt.Printf("Floor detected\n")
 	}
 	
 }

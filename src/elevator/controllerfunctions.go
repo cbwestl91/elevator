@@ -7,11 +7,10 @@ import "fmt"
 func (elevinf *Elevatorinfo) Initiate (){
 	
 	elevdriver.Init()
-	
-	elevinf.CheckLights()
-	
+	fmt.Printf("1\n")
+	fmt.Printf("2\n")
 	elevdriver.MotorDown()
-	
+	fmt.Printf("3\n")
 	for elevdriver.GetFloor() == -1 {}
 	
 	elevdriver.SetFloor(elevdriver.GetFloor())
