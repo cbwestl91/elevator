@@ -9,7 +9,7 @@ func (elevinf *Elevatorinfo) Initiate (){
 	elevdriver.Init()
 	fmt.Printf("1\n")
 	fmt.Printf("2\n")
-	elevdriver.MotorDown()
+	elevdriver.MotorUp()
 	fmt.Printf("3\n")
 	for elevdriver.GetFloor() == -1 {}
 	

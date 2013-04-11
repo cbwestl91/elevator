@@ -16,13 +16,15 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 			// First column of the order slice refers to UP buttons
 			for i := 1; i <= N_FLOORS - 1; i++ {
 				if i == floorbutton && directionbutton == 1 {
-					elevinf.external_orders[i-1][0] = 1
+					elevinf.internal_orders[i-1][0] = 1
+					// elevinf.external_orders[i-1][0] = 1
 				}
 			}
 			// Second column of the order slice refers to DOWN buttons
 			for i := 2; i <= N_FLOORS; i++ {
 				if i == floorbutton && directionbutton == 2 {
-					elevinf.external_orders[i-1][1] = 1
+					elevinf.internal_orders[i-1][1] = 1
+					// elevinf.external_orders[i-1][1] = 1
 				}
 			}
 		}

@@ -3,6 +3,7 @@ package elevator
 
 import "elevdriver"
 import "fmt"
+import "time"
 
 // checks pressed buttons and set lights accordingly
 func (elevinf *Elevatorinfo) CheckLights (){

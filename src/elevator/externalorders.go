@@ -1,6 +1,7 @@
 
 package elevator
 
+/*
 func (elevinf *Elevatorinfo) ExternalOrderDetector () {
 	
 	var checker int = 0
@@ -29,3 +30,4 @@ func (elevinf *Elevatorinfo) ExternalOrderReceiver () {
 	// other elevators to arrive -> run cost function on that orders -> return cost
 	// and then wait for a signal to either run the order or just save it.
 }
+*/

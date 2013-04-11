@@ -44,7 +44,9 @@ func Init() {
 	stopButtonChan = make(chan bool)
 	obsChan = make(chan bool)
 	
-	fmt.Printf("I made it!\n")
+	go motorHandler()
+	go listen()
+	
 }
 
 var buttonChan chan button
@@ -53,14 +55,12 @@ var motorChan chan Direction
 var stopButtonChan chan bool
 var obsChan chan bool
 
-func MotorHandler() {
+func motorHandler() {
 	currentDir := NONE
 	Write_analog(MOTOR, MIN_SPEED)
 	fmt.Printf("MotorHandler ready...\n")
 	for {
-		fmt.Printf("Waiting for newDir\n")
 		newDir := <- motorChan
-		fmt.Printf("newDir received\n")
 		if (newDir == NONE) && (currentDir == UP) {
 			Set_bit(MOTORDIR)
 			Write_analog(MOTOR, MIN_SPEED)
@@ -80,7 +80,7 @@ func MotorHandler() {
 	}
 }
 
-func Listen() {
+func listen() {
 	var floorMap = map[int] int {
 		SENSOR1 : 1,
 		SENSOR2 : 2,
@@ -129,7 +129,6 @@ func Listen() {
 				atFloor = true
 			}
 		}
-		
 		if !atFloor {
 			select {
 			case floorChan <- -1:
@@ -150,6 +149,7 @@ func Listen() {
 		*/
 		
 		for key, btn := range buttonMap {
+			time.Sleep(1E7)
 			newValue := Read_bit(key)
 			if newValue && !buttonList[key] {
 				newButton := btn
@@ -232,6 +232,7 @@ func ClearLight (floor int, dir Direction) {
 }
 
 func MotorUp () {
+	fmt.Printf("You are now inside MotorUp...\n")
 	motorChan <- UP
 }
 

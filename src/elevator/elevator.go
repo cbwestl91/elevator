@@ -2,6 +2,7 @@
 package elevator
 
 import "elevdriver"
+import "time"
 
 type Elevatorinfo struct {
 	state State
@@ -32,6 +33,7 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	elevinf.BootStatemachine()
 	
 	for {
+		time.Sleep(1E7)
 		elevinf.UpdateLastDirection()
 		elevinf.RunStatemachine()	
 	}

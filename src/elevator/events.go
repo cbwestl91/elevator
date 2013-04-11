@@ -2,6 +2,7 @@
 package elevator
 
 import "elevdriver"
+import "time"
 
 type Event int
 
