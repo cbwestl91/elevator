@@ -2,6 +2,7 @@
 package elevator
 
 import "elevdriver"
+import "time"
 
 var floor_button int
 var direction_button int
@@ -39,6 +40,8 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 	
 		floorbutton = 0
 		directionbutton = 0
+		
+		time.Sleep(1E7)
 	}
 	
 }
