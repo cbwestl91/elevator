@@ -9,17 +9,17 @@ import(
 	"time"
 )
 
-func TCPconnectionHandler(communicator commChannels) {
+func TCPconnectionHandler(communicator CommChannels) {
 	// Umbrella function for TCP part. Goroutines started here
 	go mapOverseer()
 	go listenTCP()
-	go sendTCP(communicator)	
+	go sendTCP(communicator)
 	
 	for {
 		select {
-		case newIP := <- newIPchan: // new UDP source detected, which means we need a new TCP connection			
+		case newIP := <- internal.newIPchan: // new UDP source detected			
 			go connectTCP(newIP)
-		case conn := <- startNewReceivechan: //
+		case conn := <- internal.startNewReceivechan: 
 			conn.receiveTCP(communicator)
 		}
 	}
@@ -35,20 +35,20 @@ func mapOverseer() {
 	TCPmap := make(map[string]net.Conn)
 	for {
 		select {
-		case newMapEntry := <- updateTCPmap: // new entry detected
+		case newMapEntry := <- internal.updateTCPmap: // new entry detected
 			_, exists := TCPmap[newMapEntry.IP]
 			if !exists {
 				TCPmap[newMapEntry.IP] = newMapEntry.socket
-				startNewReceivechan <- newMapEntry
+				internal.startNewReceivechan <- newMapEntry
 			}
-		case deadIP := <- isDeadchan: // someone stopped transmitting UDP, and needs to be removed from map
+		case deadIP := <- internal.isDeadchan: // someone stopped transmitting UDP, and needs to be removed from map
 			delete(TCPmap, deadIP)
 			// NEED TO STOP RECEIVING ON CONNECTION WITH THIS IP
 
-		case <- giveMeCurrentMap: // send function wants full map
-			getCurrentMap <- TCPmap
-		case wantedIP := <- giveMeConn: // if only one connection is wanted
-			getSingleConn <- TCPmap[wantedIP]
+		case <- internal.giveMeCurrentMap: // send function wants full map
+			internal.getCurrentMap <- TCPmap
+		case wantedIP := <- internal.giveMeConn: // if only one connection is wanted
+			internal.getSingleConn <- TCPmap[wantedIP]
 		}
 	}
 }
@@ -77,7 +77,7 @@ func listenTCP(){ // listens for TCP connections
 					newMapEntry := TCPconnection{socket, remoteElevIP}
 
 					// found new peer. will forward info about peer
-					updateTCPmap <- newMapEntry
+					internal.updateTCPmap <- newMapEntry
 				} // what happens if several identical copies are made? overwrite?
 			}
 		}
@@ -98,7 +98,7 @@ func connectTCP(remoteIP string) {
 			fmt.Println("error dialing TCP")
 		} else {
 			newMapEntry := TCPconnection{conn, remoteIP}
-			updateTCPmap <- newMapEntry
+			internal.updateTCPmap <- newMapEntry
 		}
 	}
 }
@@ -109,13 +109,13 @@ func connectTCP(remoteIP string) {
 //	    TCPmap from GETCURRENTMAP
 //	    input struct from COMMUNICATOR.SENDTOONE
 //	    socket from GETSINGLECONN
-func sendTCP(communicator commChannels){ 
+func sendTCP(communicator CommChannels){ 
 	for { // communication is done over channels, so function should never return
 		select {
-			case message := <- communicator.sendToAll:
+			case message := <- communicator.SendToAll:
 				fmt.Println("Sending message to all")
-				giveMeCurrentMap <- true
-				TCPmap := <- getCurrentMap
+				internal.giveMeCurrentMap <- true
+				TCPmap := <- internal.getCurrentMap
 				if TCPmap == nil {
 					fmt.Println("There are no active connections")
 				} else {
@@ -131,10 +131,10 @@ func sendTCP(communicator commChannels){
 					}
 				}
 
-			case message := <- communicator.sendToOne:
+			case message := <- communicator.SendToOne:
 				fmt.Println("Sending message to one")
-				giveMeConn <- message.IP
-				socket := <- getSingleConn
+				internal.giveMeConn <- message.IP
+				socket := <- internal.getSingleConn
 				// NEED ERROR CHECK HERE ASWELL
 				socket.Write(message.content)
 				fmt.Println("message successfully sent to %s", message.IP)
@@ -143,16 +143,16 @@ func sendTCP(communicator commChannels){
 }
 
 // OUTPUTS: messages received over MESSAGERECEIVEDCHAN
-func (conn TCPconnection) receiveTCP(communicator commChannels){
+func (conn TCPconnection) receiveTCP(communicator CommChannels){
 	var msg [512]byte
 	for {
 		n, err := conn.socket.Read(msg[0:])
 		if err != nil {
 			fmt.Println("error receiving on TCP connection: error message: %s", err)
 		} else {
-			newMessage := message{conn.IP, msg[0:n]}
+			newMessage := Message{conn.IP, msg[0:n]}
 			fmt.Println("New message has been received")
-			communicator.messageReceivedchan <- newMessage
+			communicator.MessageReceivedchan <- newMessage
 		}
 	}
 }

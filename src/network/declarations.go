@@ -16,41 +16,45 @@ const(
 
 var(
 	localIP = getIP()
-	broadcast = "129.241.187.255" //må se nærmere på adressen
+	broadcast = "78.91.15.255" //må se nærmere på adressen
 	
 	UDPport = "6574" // randomly chosen ports
 	TCPport = "6476"
 
 )
 
-var(
-
+type internalchannels struct {
 	updateTCPmap chan TCPconnection // new TCP connections are shared over this channel
 	newIPchan chan string // new IPs broadcasting UDP are shared here
 	isDeadchan chan string // when UDP module detects that someone is dead, their IP is transmitted here
-	isAlivechan chan int // for internal use in UDP module. When new ping is received, input to this channel resets death timer
-	
+	isAlivechan chan string // for internal use in UDP module. When new ping is received, input to this channel resets death timer
 	giveMeCurrentMap chan bool
 	getCurrentMap chan map[string]net.Conn
-	
 	giveMeConn chan string
 	getSingleConn chan net.Conn
-	
 	startNewReceivechan chan TCPconnection
-)
+	closeConn chan string
+	quitsendImAlive chan bool
+	quitlistenImAlive chan bool	
+	setupFail chan bool
+}
+
+var internal internalchannels
 
 type TCPconnection struct { // inputs to map containing active TCP connections are of this type. IP is key, socket is content
 	socket net.Conn
 	IP string
 }
 
-type commChannels struct { // collection of channels used for TCP communication
-	sendToAll chan message
-	sendToOne chan message
-	messageReceivedchan chan message
+type CommChannels struct { // collection of channels used for TCP communication
+	SendToAll chan Message
+	SendToOne chan Message
+	MessageReceivedchan chan Message
+	getDeadIPchan chan string
+	sendDeadIPchan chan string
 }
 
-type message struct { // messages sent over TCP are converted to this type, before being transmitted over channels
+type Message struct { // outgoing/incoming messages are made into this type before being transmitted
 	IP string
 	content []byte
 }

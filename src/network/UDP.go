@@ -11,70 +11,99 @@ import(
 )
 
 
-func UDPconnectionHandler(remoteElev string) { //goroutine that keeps track of who is alive and who isn't
+func UDPHandler(communicator CommChannels) { //goroutine that keeps track of who is alive and who isn't
+	aliveMap := make(map[string]time.Time)
 	for{
 		select{
-			case <- isAlivechan:
-				// IMPLEMENT DEATH TIMER
-				continue
-			case <- time.After(toleratedLosses * sleepduration * time.Millisecond):
-				// remote elevator death detected. TRANSMIT!
-				isDeadchan <- remoteElev
+		case ip := <- internal.isAlivechan:
+			_, inMap := aliveMap[ip]
+			if inMap {
+				aliveMap[ip] = time.Now()
+			} else {
+				aliveMap[ip] = time.Now()
+				internal.newIPchan <- ip
+			}
+		case <- time.After(50*time.Millisecond):
+			for ip, lasttime := range aliveMap {
+				if time.Now().After(lasttime.Add(toleratedLosses * sleepduration * time.Millisecond)){
+					fmt.Println("someone missed UDP deadline, and is terminated from aliveMap")
+					communicator.getDeadIPchan <- ip					
+					internal.isDeadchan <- ip
+					delete(aliveMap, ip)
+				}
+			}
+		case deadIP := <- communicator.sendDeadIPchan:
+			internal.closeConn <- deadIP
 		}
 	}
-}	
+}
 
 func sendImAlive() {
 	service := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp4", service)
-	errorhandler(err)
+	if err != nil {
+		fmt.Println("net.ResolveUDPAddr error in sendImAlive: ", err)
+		internal.setupFail <- true
+	}
 
-	isaliveconn, err := net.DialUDP("udp4", nil, addr)
-	errorhandler(err)
+	isalivesocket, err := net.DialUDP("udp4", nil, addr)
+	if err != nil {
+		fmt.Println("net.DialUDP error in sendImAlive: ", err)
+		internal.setupFail <- true
+	}
+	isAliveMessage := []byte("ping")
 	
-	isaliveMessage := []byte("1")
 	for {
-		_, err := isaliveconn.Write(isaliveMessage)
-		if err != nil {
-			fmt.Println("Error sending Imalive message")
-		} else {
-			fmt.Println("Imalive message sent")
+		select {
+		case <- internal.quitsendImAlive:
+			return
+		default:
+			_, err := isalivesocket.Write(isAliveMessage)
+			if err != nil {
+				fmt.Println("Write error in sendImAlive: ", err)
+			} else {
+				fmt.Println("I'm alive message sent")
+			}
+			time.Sleep(sleepduration * time.Millisecond)
 		}
-		time.Sleep(sleepduration * time.Millisecond)
 	}
 }
 
 func listenImAlive() {
 	service := broadcast + ":" + UDPport
 	addr, err := net.ResolveUDPAddr("udp4", service)
-	errorhandler(err)
+	if err != nil {
+		fmt.Println("net.ResolveUDPAddr error in listenImAlive: ", err)
+		internal.setupFail <- true
+	}
 
-	isaliveconn, err := net.ListenUDP("udp4", addr)
-	errorhandler(err)
-
+	isalivesocket, err := net.ListenUDP("udp4", addr)
+	if err != nil {
+		fmt.Println("net.ListenUDP error in listenImAlive: ", err)
+		internal.setupFail <- true
+	}
 	var data [512]byte
-	anotherElev := make(map[string]chan int)
-
+	
 	for {
-		fmt.Println("network.ListenImAlive() --> reading from UDP")
-		_, senderAddr, err := isaliveconn.ReadFromUDP(data[0:])
-		errorhandler(err)
-		if localIP != senderAddr.IP.String(){ // makes sure we don't pick up packets from ourselves
-			fmt.Println("ImAlive message received")
-			
-			remoteElev := senderAddr.IP.String()
-			_, inMap := anotherElev[remoteElev]
-			
-			if inMap{ // inform handler that some IP already in map is still alive, and reset death timer
-				anotherElev[remoteElev] <- isAlive
-			} else{ //new participant found, must add to map and give designated handler
-				
-				anotherElev[remoteElev] = isAlivechan
-				go UDPconnectionHandler(remoteElev)
-				
-				anotherElev[remoteElev] <- isAlive
+		select {
+		case <- internal.quitlistenImAlive:
+			return
+		default:
+			_, senderAddr, err := isalivesocket.ReadFromUDP(data[0:])
+			if err != nil {
+				fmt.Println("ReadFromUDP error in listenImAlive: ", err)
+				break
 			}
-			newIPchan <- remoteElev
+			if localIP != senderAddr.IP.String(){
+				fmt.Println("ImAlive message received")
+			
+				if err != nil {
+					fmt.Println("read error in listenImAlive")
+				} else {
+					remoteElev := senderAddr.IP.String()
+					internal.isAlivechan <- remoteElev
+				}
+			}
 		}
 	}
 }
