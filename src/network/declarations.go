@@ -18,8 +18,8 @@ var(
 	localIP = getIP()
 	broadcast = "129.241.187.255" //må se nærmere på adressen
 	
-	UDPport = "8165" // randomly chosen ports
-	TCPport = "8166"
+	UDPport = "6574" // randomly chosen ports
+	TCPport = "6476"
 
 )
 
