@@ -1,4 +1,6 @@
-
+//-----------------------------------------------------------------------------------------//
+//                                   ELEVATOR	                                           //
+//-----------------------------------------------------------------------------------------//
 package elevator
 
 import "elevdriver"
@@ -20,7 +22,7 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	elevinf.state = IDLE
 	elevinf.event = NO_EVENT
 	
-	// Order Arrays
+	// Initializing order arrays
 	elevinf.internal_orders = make([][]int, N_FLOORS)
 	for i := range(elevinf.internal_orders){
 		elevinf.internal_orders[i] = make([]int, N_BUTTONS)
@@ -35,6 +37,7 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	for {
 		time.Sleep(1E7)
 		elevinf.UpdateLastDirection()
+		FloorIndicator()
 		elevinf.RunStatemachine()	
 	}
 	

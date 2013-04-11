@@ -1,4 +1,6 @@
-// Function for deciding which event is taking place
+//-----------------------------------------------------------------------------------------//
+//                                   EVENTS                                                //
+//-----------------------------------------------------------------------------------------//
 package elevator
 
 import "elevdriver"
@@ -15,9 +17,7 @@ const (
 )
 
 func (elevinf *Elevatorinfo) SetEvent(){
-	
 	for{
-	
 		if elevdriver.GetStopButton() && elevinf.state != EMERGENCY {
 			elevinf.event = STOP
 		} else if elevdriver.GetObs() {
@@ -31,7 +31,5 @@ func (elevinf *Elevatorinfo) SetEvent(){
 			elevinf.event = NO_EVENT
 		}
 		time.Sleep(1E7)
-		
 	}
-	
 }

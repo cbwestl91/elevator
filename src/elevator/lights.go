@@ -1,4 +1,6 @@
-// Functions for controlling the lights on the elevatorpanel
+//-----------------------------------------------------------------------------------------//
+//                                   LIGHTS                                                //
+//-----------------------------------------------------------------------------------------//
 package elevator
 
 import "elevdriver"
@@ -7,7 +9,6 @@ import "time"
 
 // checks pressed buttons and set lights accordingly
 func (elevinf *Elevatorinfo) CheckLights (){
-	
 	for {
 		if elevinf.state != EMERGENCY || (elevinf.state == EMERGENCY && elevinf.event == ORDER) {
 			for i := 0; i < 3; i++ {
@@ -25,7 +26,6 @@ func (elevinf *Elevatorinfo) CheckLights (){
 				}
 			}
 		}
-	
 		for i := 0; i < 4; i++ {
 			if elevinf.internal_orders[i][2] == 1 {
 				elevdriver.SetLight(i, 0)
@@ -33,20 +33,16 @@ func (elevinf *Elevatorinfo) CheckLights (){
 				elevdriver.ClearLight(i, 0)
 			}
 		}
-		
 		time.Sleep(1E7)
 	}
-	
 }
 
 // sets floorindicator light
 func FloorIndicator(){
-
 	if elevdriver.GetFloor()  > 0 { 
 		elevdriver.SetFloor(elevdriver.GetFloor())
 		fmt.Printf("Floor detected\n")
 	}
-	
 }
 
 

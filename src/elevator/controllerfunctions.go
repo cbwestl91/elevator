@@ -1,29 +1,25 @@
-
+//-----------------------------------------------------------------------------------------//
+//                                   CONTROLLERFUNCTIONS                                   //
+//-----------------------------------------------------------------------------------------//
 package elevator
 
 import "elevdriver"
 import "fmt"
 
 func (elevinf *Elevatorinfo) Initiate (){
-	
 	elevdriver.Init()
-	fmt.Printf("1\n")
-	fmt.Printf("2\n")
-	elevdriver.MotorUp()
-	fmt.Printf("3\n")
+	StartMotor(-1)
 	for elevdriver.GetFloor() == -1 {}
 	
 	elevdriver.SetFloor(elevdriver.GetFloor())
 	
-	elevdriver.MotorUp()
+	StartMotor(1)
 	elevdriver.MotorStop()
 	
 	fmt.Printf("Elevator initiation complete!\n")
-	
 }
 
-// This fucntions checks how many orders are under and above, and returns a number telling where it will go
-func (elevinf *Elevatorinfo) DetermineDirection ()(int){
+func (elevinf *Elevatorinfo) DetermineDirection ()(int){ // The elevators "brain", choosing which way to go depending on direction and orders
 	
 	current_floor := elevdriver.GetFloor()
 	orders_over := 0
@@ -57,7 +53,6 @@ func (elevinf *Elevatorinfo) DetermineDirection ()(int){
 } 
 
 func StartMotor(direction int)() {
-	
 	if direction == -1 {
 		elevdriver.MotorDown()
 		fmt.Printf("Elevator going down\n")
@@ -69,7 +64,6 @@ func StartMotor(direction int)() {
 
 
 func (elevator *Elevatorinfo) StopButtonPushed() {
-	
 	elevdriver.SetStopButton()
 	fmt.Printf("Stop button has been pushed\n")
 	for i := 0; i < 4; i++ {
@@ -78,7 +72,6 @@ func (elevator *Elevatorinfo) StopButtonPushed() {
 		}
 	}
 	elevdriver.MotorStop()
-
 }
 
 
