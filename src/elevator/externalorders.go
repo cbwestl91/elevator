@@ -7,8 +7,8 @@ func (elevinf *Elevatorinfo) ExternalOrderDetector () {
 	
 	for {
 		//Checking for "own" external orders
-		for i:= 0; i < 4; i++ {
-			for j := 0; j<2 ; j++ {
+		for i := 0; i < 4; i++ {
+			for j := 0; j < 2; j++ {
 					if elevinf.external_orders[i][j] == 1 {
 						checker++
 					}
@@ -22,4 +22,10 @@ func (elevinf *Elevatorinfo) ExternalOrderDetector () {
 		checker = 0
 	}
 	
+}
+
+func (elevinf *Elevatorinfo) ExternalOrderReceiver () {
+	// This function will run as a thread, waiting external orders from
+	// other elevators to arrive -> run cost function on that orders -> return cost
+	// and then wait for a signal to either run the order or just save it.
 }
