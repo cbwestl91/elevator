@@ -7,6 +7,7 @@ import(
 	"net"
 	"strings"
 	"time"
+	"io"
 )
 
 func TCPHandler(communicator CommChannels) {
@@ -41,7 +42,6 @@ func mapOverseer() {
 				fmt.Println("IP already exists in TCPmap. Won't do anything")
 			}
 		case deadIP := <- internal.isDeadchan: // someone stopped transmitting UDP, and needs to be removed from map
-			internal.closeConn <- deadIP
 			delete(TCPmap, deadIP)
 			// NEED TO STOP RECEIVING ON CONNECTION WITH THIS IP
 
@@ -150,20 +150,16 @@ func sendTCP(communicator CommChannels){
 func (conn TCPconnection) receiveTCP(communicator CommChannels){
 	var msg [512]byte
 	for {
-		select {
-		case deadIP := <- internal.closeConn:
-			if deadIP == conn.IP {
-				break
+		n, err := conn.socket.Read(msg[0:])
+		if err != nil {
+			fmt.Println("Read error in receiveTCP: ", conn.IP, err)
+			if err == io.EOF {
+				return
 			}
-		default:
-			n, err := conn.socket.Read(msg[0:])
-			if err != nil {
-				fmt.Println("Read error in receiveTCP: ", conn.IP, err)
-			} else {
-				newMessage := Message{conn.IP, msg[0:n]}
-				fmt.Println("New message has been received")
-				communicator.MessageReceivedchan <- newMessage
-			}
+		} else {
+			newMessage := Message{conn.IP, msg[0:n]}
+			fmt.Println("New message has been received")
+			communicator.MessageReceivedchan <- newMessage
 		}
 	}
 }
