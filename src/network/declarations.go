@@ -16,7 +16,7 @@ const(
 
 var(
 	localIP = getIP()
-	broadcast = "78.91.7.255" //må se nærmere på adressen
+	broadcast = "129.241.187.255" //må se nærmere på adressen
 
 	UDPport = "6574" // randomly chosen ports
 	TCPport = "6476"

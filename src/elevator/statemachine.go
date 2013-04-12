@@ -11,8 +11,8 @@ type State int
 
 const ( // Giving the states values with iote -> increments from 0
 	IDLE State = iota
-	UP 
-	DOWN 
+	ASCENDING
+	DECENDING
 	OPEN_DOOR 
 	EMERGENCY 
 )
@@ -22,29 +22,36 @@ func (elevinf *Elevatorinfo) BootStatemachine (){ // Called once, prepares eleva
 	elevinf.last_floor = 0
 	
 	elevinf.Initiate()
+	go FloorIndicator()
 	go elevinf.CheckLights()
 	go elevinf.ReceiveOrders()
 	go elevinf.SetEvent()
+	go elevinf.PrintStatus()
+	go elevinf.UpdateLastDirection()
 	
 	fmt.Printf("STATEMACHINE BOOTED!\n")
 }
 
-func (elevinf *Elevatorinfo) UpdateLastDirection(){ 
-	if elevinf.state == UP{
-		elevinf.last_direction = 1
-	} else if elevinf.state == DOWN {
-		elevinf.last_direction = 2
+func (elevinf *Elevatorinfo) UpdateLastDirection(){
+	for{ 
+		if elevinf.state == ASCENDING{
+			elevinf.last_direction = 1
+		} else if elevinf.state == DECENDING {
+			elevinf.last_direction = 2
+		}
+		time.Sleep(1E7)
 	}
 }
 
 func (elevinf *Elevatorinfo) RunStatemachine(){
 	switch elevinf.state {
 		case IDLE:
+			fmt.Printf("Case Idle engaged...\n")
 			elevinf.statemachineIdle()
-		case UP:
-			elevinf.statemachineUp()
-		case DOWN:
-			elevinf.statemachineDown()
+		case ASCENDING:
+			elevinf.statemachineAscending()
+		case DECENDING:
+			elevinf.statemachineDecending()
 		case OPEN_DOOR:
 			elevinf.statemachineOpendoor()
 		case EMERGENCY:
@@ -64,14 +71,14 @@ func (elevinf *Elevatorinfo) statemachineIdle() {
 			if elevinf.DetermineDirection() == -2 {
 				elevinf.state = OPEN_DOOR
 			} else if elevinf.DetermineDirection() == -1 {
-				elevinf.state = DOWN
+				elevinf.state = DECENDING
 			} else if elevinf.DetermineDirection() == 1 {
 				if elevdriver.GetFloor() == -1 {
 					elevinf.Initiate()
 						elevinf.state = IDLE
 					break
 				}
-				elevinf.state = UP
+				elevinf.state = ASCENDING
 			}
 		case STOP:
 			elevinf.StopButtonPushed()
@@ -84,7 +91,7 @@ func (elevinf *Elevatorinfo) statemachineIdle() {
 	}
 }
 
-func (elevinf *Elevatorinfo) statemachineUp() {
+func (elevinf *Elevatorinfo) statemachineAscending() {
 	switch elevinf.event {
 		case ORDER:
 		case STOP:
@@ -93,22 +100,22 @@ func (elevinf *Elevatorinfo) statemachineUp() {
 		case OBSTRUCTION:
 			elevinf.StopButtonPushed()
 			elevinf.state = EMERGENCY
-		case SENSOR: // Destination reached || someone wants to go UP || no orders above DOWN
+		case SENSOR: // Destination reached || someone wants to go UP || no orders above DECENDING
 			FloorIndicator()
 			if elevinf.StopAtCurrentFloor() == 1 {
-				elevdriver.MotorStop()
+				elevinf.StopMotor()
 				elevinf.state = OPEN_DOOR
 				elevinf.DeleteOrders()
 				break
 			} else if elevdriver.GetFloor() == 4 {
-				elevdriver.MotorStop()
+				elevinf.StopMotor()
 				elevinf.state = IDLE
 			}
 		case NO_EVENT:
 	}
 }
 
-func (elevinf *Elevatorinfo) statemachineDown() {
+func (elevinf *Elevatorinfo) statemachineDecending() {
 	switch elevinf.event {
 		case ORDER:
 		case STOP:
@@ -120,12 +127,12 @@ func (elevinf *Elevatorinfo) statemachineDown() {
 		case SENSOR:
 			FloorIndicator()
 			if elevinf.StopAtCurrentFloor() == -1 {
-				elevdriver.MotorStop()
+				elevinf.StopMotor()
 				elevinf.state = OPEN_DOOR
 				elevinf.DeleteOrders()
 				break
 			} else if elevdriver.GetFloor() == 1 {
-				elevdriver.MotorStop()
+				elevinf.StopMotor()
 				elevinf.state = IDLE
 			}
 		case NO_EVENT:
@@ -158,11 +165,11 @@ func (elevinf *Elevatorinfo) statemachineOpendoor() {
 			if elevinf.DetermineDirection() == -2 {
 				elevinf.state = OPEN_DOOR
 			} else if elevinf.DetermineDirection() == -1 {
-				elevinf.state = DOWN
-				MotorStart(-1)
+				elevinf.state = DECENDING
+				StartMotor(-1)
 			} else if elevinf.DetermineDirection() == 1 {
-				elevinf.state = UP
-				MotorStart(1)
+				elevinf.state = ASCENDING
+				StartMotor(1)
 			} else if elevinf.DetermineDirection() == 2 {
 				elevinf.state = IDLE
 			}
@@ -193,10 +200,10 @@ func (elevinf *Elevatorinfo) statemachineOpendoor() {
 			if elevinf.DetermineDirection() == -2 {
 				elevinf.state = OPEN_DOOR
 			} else if elevinf.DetermineDirection() == -1 {
-				elevinf.state = DOWN
+				elevinf.state = DECENDING
 				StartMotor(-1)
 			} else if elevinf.DetermineDirection() == 1 {
-				elevinf.state = UP
+				elevinf.state = ASCENDING
 				StartMotor(1)
 			} else if elevinf.DetermineDirection() == 2 {
 				elevinf.state = IDLE
@@ -215,7 +222,7 @@ func (elevinf *Elevatorinfo) statemachineEmergency() {
 						for elevdriver.GetFloor() == -1 {
 							StartMotor(-1)
 							if elevinf.StopAtCurrentFloor() == 2 {
-								elevdriver.MotorStop()
+								elevinf.StopMotor()
 								elevinf.state = OPEN_DOOR
 								elevinf.DeleteOrders()
 								break
@@ -231,11 +238,11 @@ func (elevinf *Elevatorinfo) statemachineEmergency() {
 					if elevinf.DetermineDirection() == -2 {
 						elevinf.state = OPEN_DOOR
 					} else if elevinf.DetermineDirection() == -1 {
-						elevinf.state = DOWN
-						MotorStart(-1)
+						elevinf.state = DECENDING
+						StartMotor(-1)
 					} else if elevinf.DetermineDirection() == 1 {
-						elevinf.state = UP
-						MotorStart(1)
+						elevinf.state = ASCENDING
+						StartMotor(1)
 					}
 				}
 			}

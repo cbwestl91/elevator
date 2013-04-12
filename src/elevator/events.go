@@ -22,7 +22,7 @@ func (elevinf *Elevatorinfo) SetEvent(){
 			elevinf.event = STOP
 		} else if elevdriver.GetObs() {
 			elevinf.event = OBSTRUCTION
-		} else if elevinf.DetermineDirection() != 2 && elevinf.state != UP && elevinf.state != DOWN {
+		} else if elevinf.DetermineDirection() != 2 && elevinf.state != ASCENDING && elevinf.state != DECENDING {
 			elevinf.event = ORDER
 		} else if elevdriver.GetFloor() != -1 {
 			elevinf.event = SENSOR

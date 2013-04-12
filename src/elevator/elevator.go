@@ -3,8 +3,16 @@
 //-----------------------------------------------------------------------------------------//
 package elevator
 
-import "elevdriver"
+import "fmt"
 import "time"
+
+type Direction int
+
+const (
+	NONE Direction = iota
+	UP
+	DOWN
+)
 
 type Elevatorinfo struct {
 	state State
@@ -12,7 +20,7 @@ type Elevatorinfo struct {
 	internal_orders [][]int
 	external_orders [][]int
 	last_floor int
-	last_direction elevdriver.Direction
+	last_direction Direction
 }
 
 var N_FLOORS, N_BUTTONS int = 4, 3
@@ -35,10 +43,63 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	elevinf.BootStatemachine()
 	
 	for {
-		time.Sleep(1E7)
-		elevinf.UpdateLastDirection()
-		FloorIndicator()
+	fmt.Printf("Im inside the looooop :)\n")
 		elevinf.RunStatemachine()	
 	}
 	
 }
+
+func (elevinf *Elevatorinfo) PrintStatus() {
+	for {
+		var s1, s2, s3 string
+		switch elevinf.state {
+			case IDLE:
+				s1 = "IDLE"
+			case ASCENDING:
+				s1 = "ASCENDING"
+			case DECENDING:
+				s1 = "DECENDING"
+			case OPEN_DOOR:
+				s1 = "OPEN_DOOR"
+			case EMERGENCY:
+				s1 = "EMERGENCY"
+		}
+		switch elevinf.event {
+			case ORDER:
+				s2 = "ORDER"
+			case STOP:
+				s2 = "STOP"
+			case OBSTRUCTION:
+				s2 = "OBSTRUCTION"
+			case SENSOR:
+				s2 = "SENSOR"
+			case NO_EVENT:
+				s2 = "NO_EVENT"
+		}
+		switch elevinf.last_direction {
+			case NONE:
+				s3 = "NONE"
+			case UP:
+				s3 = "UP"
+			case DOWN:
+				s3 = "DOWN"
+		}
+		fmt.Printf("Elevatorstatus--> State: %s Event: %s LastFloor: %d LastDirection: %s\n",
+					s1, s2, elevinf.last_floor, s3)	
+		time.Sleep(100*time.Millisecond)
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

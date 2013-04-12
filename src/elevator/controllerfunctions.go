@@ -5,16 +5,15 @@ package elevator
 
 import "elevdriver"
 import "fmt"
+import "time"
 
 func (elevinf *Elevatorinfo) Initiate (){
 	elevdriver.Init()
 	StartMotor(-1)
+	elevinf.last_direction = 2
 	for elevdriver.GetFloor() == -1 {}
 	
-	elevdriver.SetFloor(elevdriver.GetFloor())
-	
-	StartMotor(1)
-	elevdriver.MotorStop()
+	elevinf.StopMotor()
 	
 	fmt.Printf("Elevator initiation complete!\n")
 }
@@ -28,11 +27,11 @@ func (elevinf *Elevatorinfo) DetermineDirection ()(int){ // The elevators "brain
 	
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
-			if elevinf.internal_orders[i][j] == 1 && i < current_floor {
+			if elevinf.internal_orders[i][j] == 1 && i < current_floor-1 {
 				orders_under++
-			} else if elevinf.internal_orders[i][j] == 1 && i > current_floor {
+			} else if elevinf.internal_orders[i][j] == 1 && i > current_floor-1 {
 				orders_over++
-			} else if elevinf.internal_orders[i][j] == 1 && i == current_floor {
+			} else if elevinf.internal_orders[i][j] == 1 && i == current_floor-1 {
 				orders_at_current++
 			}	
 		}
@@ -59,9 +58,25 @@ func StartMotor(direction int)() {
 	} else if direction == 1 {
 		elevdriver.MotorUp()
 		fmt.Printf("Elevator going up\n")
+	} else if direction == -2 || direction == 2 {
+		elevdriver.MotorStop()
 	}
+	
 }
 
+func (elevinf *Elevatorinfo) StopMotor(){
+	if elevinf.last_direction == 1 {
+		elevdriver.MotorDown()
+		time.Sleep(14*time.Millisecond)
+		elevdriver.MotorStop()
+		fmt.Printf("STAHP\n")
+	} else if elevinf.last_direction == 2 {
+		elevdriver.MotorUp()
+		time.Sleep(14*time.Millisecond)
+		fmt.Printf("STAHP!\n")
+		elevdriver.MotorStop()
+	}
+}
 
 func (elevator *Elevatorinfo) StopButtonPushed() {
 	elevdriver.SetStopButton()

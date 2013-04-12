@@ -61,6 +61,7 @@ func motorHandler() {
 	fmt.Printf("MotorHandler ready...\n")
 	for {
 		newDir := <- motorChan
+		fmt.Printf("Motor: ENGAGING\n")
 		if (newDir == NONE) && (currentDir == UP) {
 			Set_bit(MOTORDIR)
 			Write_analog(MOTOR, MIN_SPEED)
@@ -234,6 +235,7 @@ func ClearLight (floor int, dir Direction) {
 func MotorUp () {
 	fmt.Printf("You are now inside MotorUp...\n")
 	motorChan <- UP
+	fmt.Printf("newDir sent...\n")
 }
 
 func MotorDown () {

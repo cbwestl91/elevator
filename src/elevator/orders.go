@@ -14,20 +14,20 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 		floorbutton, directionbutton := elevdriver.GetButton()
 	
 		if elevinf.state != EMERGENCY || (elevinf.state == EMERGENCY || elevinf.event == ORDER) {
-			for i := 1; i <= N_FLOORS - 1; i++ { // First column of the order slice refers to UP buttons
+			for i := 1; i < 4; i++ { // First column of the order slice refers to UP buttons
 				if i == floorbutton && directionbutton == 1 {
 					elevinf.internal_orders[i-1][0] = 1
 					// elevinf.external_orders[i-1][0] = 1
 				}
 			}
-			for i := 2; i <= N_FLOORS; i++ { // Second column of the order slice refers to DOWN buttons
+			for i := 2; i < 5; i++ { // Second column of the order slice refers to DOWN buttons
 				if i == floorbutton && directionbutton == 2 {
 					elevinf.internal_orders[i-1][1] = 1
 					// elevinf.external_orders[i-1][1] = 1
 				}
 			}
 		}
-		for i := 1; i <= N_FLOORS; i++ { // Third column of the order slice refers to COMMAND buttons
+		for i := 1; i < 5; i++ { // Third column of the order slice refers to COMMAND buttons
 			if i == floorbutton && directionbutton == 0 {
 				elevinf.internal_orders[i-1][2] = 1
 			}
@@ -41,73 +41,73 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 		floorbutton = 0
 		directionbutton = 0
 		
-		time.Sleep(1E7)
+		time.Sleep(1E8)
 	}
 }
 
 func (elevinf *Elevatorinfo) StopAtCurrentFloor()(int){
 	var current int = elevdriver.GetFloor()
-	if elevinf.state == UP {
+	if elevinf.state == ASCENDING {
 		for i := 0; i < 3; i = i+2 {
-			if current == 0 && elevinf.internal_orders[current][i] == 1 {
+			if current == 1 && elevinf.internal_orders[current-1][i] == 1 {
 				return 1
-			} else if current == 1 && elevinf.internal_orders[current][i] == 1 {
+			} else if current == 2 && elevinf.internal_orders[current-1][i] == 1 {
 				return 1
-			} else if current == 2 && elevinf.internal_orders[current][i] == 1 {
+			} else if current == 3 && elevinf.internal_orders[current-1][i] == 1 {
 				return 1
-			} else if current == 3 && elevinf.internal_orders[current][i] == 1 {
+			} else if current == 4 && elevinf.internal_orders[current-1][i] == 1 {
 				return 1
 			}
 		}
 		orders_above_current := 0
-		for i := current+1; i < 4; i++ {
+		for i := current; i < 4; i++ {
 			for j := 0; j < 3; j++ {
 				if elevinf.internal_orders[i][j] == 1 {
 					orders_above_current++
 				}
 			}
 		}
-		if elevinf.internal_orders[current][1] == 1 && orders_above_current == 0 {
+		if elevinf.internal_orders[current-1][1] == 1 && orders_above_current == 0 {
 			return 1
 		}
-		if current == 3 && elevinf.internal_orders[3][1] == 1 {
+		if current == 4 && elevinf.internal_orders[3][1] == 1 {
 			return 1	
 		}
-	} else if elevinf.state == DOWN {
-		for i := 1; i < 3; i++ {
-			if current == 0 && elevinf.internal_orders[0][i] == 1 {
+	} else if elevinf.state == DECENDING {
+		for i := 1; i < 3 ; i++ {
+			if current == 1 && elevinf.internal_orders[current-1][i] == 1 {
 				return -1
-			} else if current == 1 && elevinf.internal_orders[1][i] == 1 {
+			} else if current == 2 && elevinf.internal_orders[current-1][i] == 1 {
 				return -1
-			} else if current == 2 && elevinf.internal_orders[2][i] == 1 {
+			} else if current == 3 && elevinf.internal_orders[current-1][i] == 1 {
 				return -1
-			} else if current == 3 && elevinf.internal_orders[3][i] == 1 {
+			} else if current == 4 && elevinf.internal_orders[current-1][i] == 1 {
 				return -1
 			}
 		}
-		if current == 0 && elevinf.internal_orders[0][0] == 1 {
+		if current == 1 && elevinf.internal_orders[0][0] == 1 {
 			return -1
 		}
 		orders_below_current := 0
-		for i := 0; i < current; i++ {
+		for i := 0; i < current-1; i++ {
 			for j := 0; j < 3; j++ {
 				if elevinf.internal_orders[i][j] == 1 {
 					orders_below_current++
 				}
 			}
 		}
-		if elevinf.internal_orders[current][0] == 1 && orders_below_current == 0{
+		if elevinf.internal_orders[current-1][0] == 1 && orders_below_current == 0{
 			return -1
 		}
 	} else if elevinf.state == EMERGENCY {
 		for i := 0; i < 3; i++ {
-			if current == 0 && elevinf.internal_orders[0][i] == 1{
+			if current == 1 && elevinf.internal_orders[0][i] == 1{
 				return 2
-			} else if current == 1 && elevinf.internal_orders[1][i] == 1{
+			} else if current == 2 && elevinf.internal_orders[1][i] == 1{
 				return 2
-			} else if current == 2 && elevinf.internal_orders[2][i] == 1{
+			} else if current == 3 && elevinf.internal_orders[2][i] == 1{
 				return 2
-			} else if current == 3 && elevinf.internal_orders[3][i] == 1{
+			} else if current == 4 && elevinf.internal_orders[3][i] == 1{
 				return 2
 			}
 		}
