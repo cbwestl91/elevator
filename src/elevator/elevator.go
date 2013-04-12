@@ -43,7 +43,7 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	elevinf.BootStatemachine()
 	
 	for {
-	fmt.Printf("Im inside the looooop :)\n")
+		time.Sleep(1E7)
 		elevinf.RunStatemachine()	
 	}
 	

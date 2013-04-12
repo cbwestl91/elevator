@@ -4,6 +4,7 @@
 package elevator
 
 import "elevdriver"
+import "fmt"
 import "time"
 
 var floor_button int
@@ -47,6 +48,7 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 
 func (elevinf *Elevatorinfo) StopAtCurrentFloor()(int){
 	var current int = elevdriver.GetFloor()
+	fmt.Printf("%d",current)
 	if elevinf.state == ASCENDING {
 		for i := 0; i < 3; i = i+2 {
 			if current == 1 && elevinf.internal_orders[current-1][i] == 1 {
