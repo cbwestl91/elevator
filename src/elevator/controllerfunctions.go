@@ -54,10 +54,10 @@ func (elevinf *Elevatorinfo) DetermineDirection ()(int){ // The elevators "brain
 func StartMotor(direction int)() {
 	if direction == -1 {
 		elevdriver.MotorDown()
-		fmt.Printf("Elevator going down\n")
+		fmt.Printf("Elevator going down...\n")
 	} else if direction == 1 {
 		elevdriver.MotorUp()
-		fmt.Printf("Elevator going up\n")
+		fmt.Printf("Elevator going up...\n")
 	} else if direction == -2 || direction == 2 {
 		elevdriver.MotorStop()
 	}
@@ -69,18 +69,18 @@ func (elevinf *Elevatorinfo) StopMotor(){
 		elevdriver.MotorDown()
 		time.Sleep(14*time.Millisecond)
 		elevdriver.MotorStop()
-		fmt.Printf("STAHP\n")
+		fmt.Printf("Stopping...\n")
 	} else if elevinf.last_direction == 2 {
 		elevdriver.MotorUp()
 		time.Sleep(14*time.Millisecond)
-		fmt.Printf("STAHP!\n")
+		fmt.Printf("Stopping...\n")
 		elevdriver.MotorStop()
 	}
 }
 
 func (elevator *Elevatorinfo) StopButtonPushed() {
 	elevdriver.SetStopButton()
-	fmt.Printf("Stop button has been pushed\n")
+	fmt.Printf("Stop button has been pushed...\n")
 	for i := 0; i < 4; i++ {
 		for j := 0; j < 3; j++ {
 			elevator.internal_orders[i][j] = 0

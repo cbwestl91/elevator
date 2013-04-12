@@ -61,17 +61,21 @@ func motorHandler() {
 	fmt.Printf("MotorHandler ready...\n")
 	for {
 		newDir := <- motorChan
-		fmt.Printf("Motor: ENGAGING\n")
+		fmt.Printf("newDir recieved: ")
 		if (newDir == NONE) && (currentDir == UP) {
+			fmt.Printf("Motor stopping...\n")
 			Set_bit(MOTORDIR)
 			Write_analog(MOTOR, MIN_SPEED)
 		} else if (newDir == NONE) && (currentDir == DOWN) {
+			fmt.Printf("Motor stopping...\n")
 			Clear_bit(MOTORDIR)
 			Write_analog(MOTOR, MIN_SPEED)
 		} else if (newDir == UP) {
+			fmt.Printf("Elevator ascending...\n")
 			Clear_bit(MOTORDIR)
 			Write_analog(MOTOR, MAX_SPEED)
 		} else if (newDir == DOWN) {
+			fmt.Printf("Elevator decending...\n")
 			Set_bit(MOTORDIR)
 			Write_analog(MOTOR, MAX_SPEED)
 		} else {
@@ -117,10 +121,12 @@ func listen() {
 	
 	// Here are the changes we did to the elevdriver!
 	atFloor := false
+	gotButton := false
 	
 	for {	
-		atFloor = false
 		time.Sleep(1E7)
+		atFloor = false
+		
 		for key, floor := range floorMap {
 			if Read_bit(key) {
 				select {
@@ -148,9 +154,25 @@ func listen() {
 			floorList[key] = newValue
 		}
 		*/
+		gotButton = false
 		
 		for key, btn := range buttonMap {
-			time.Sleep(1E7)
+			if Read_bit(key) {
+				select {
+				case buttonChan <- btn:
+				default:
+				}
+				gotButton = true
+			}
+				
+		}	
+		if !gotButton {
+			select {
+			case buttonChan <- button{-1,NONE}:
+			default:
+			}
+		}
+		/*
 			newValue := Read_bit(key)
 			if newValue && !buttonList[key] {
 				newButton := btn
@@ -160,6 +182,7 @@ func listen() {
 			}
 			buttonList[key] = newValue
 		}
+		*/
 		/*
 		newStop := Read_bit(STOP)
 		if newStop && !oldStop {
@@ -233,19 +256,18 @@ func ClearLight (floor int, dir Direction) {
 }
 
 func MotorUp () {
-	fmt.Printf("You are now inside MotorUp...\n")
 	motorChan <- UP
-	fmt.Printf("newDir sent...\n")
+	fmt.Printf("newDir UP sent...\n")
 }
 
 func MotorDown () {
-	fmt.Printf("You are now inside MotorDown...\n")
 	motorChan <- DOWN
-	fmt.Printf("newDir sent...\n")
+	fmt.Printf("newDir DOWN sent...\n")
 }
 
 func MotorStop () {
 	motorChan <- NONE
+	fmt.Printf("newDir NONE sent...\n")
 }
 
 func GetButton () (int, Direction) {

@@ -4,7 +4,8 @@
 package elevator
 
 import "elevdriver"
-import "time"
+import "fmt"
+// import "time"
 
 type Event int
 
@@ -17,19 +18,22 @@ const (
 )
 
 func (elevinf *Elevatorinfo) SetEvent(){
-	for{
-		if elevdriver.GetStopButton() && elevinf.state != EMERGENCY {
+	// for{
+		currentFloor := elevdriver.GetFloor()
+		switch{ 
+		case elevdriver.GetStopButton() && elevinf.state != EMERGENCY:
 			elevinf.event = STOP
-		} else if elevdriver.GetObs() {
+		case elevdriver.GetObs():
 			elevinf.event = OBSTRUCTION
-		} else if elevinf.DetermineDirection() != 2 && elevinf.state != ASCENDING && elevinf.state != DECENDING {
+		case elevinf.DetermineDirection() != 2 && elevinf.state != ASCENDING && elevinf.state != DECENDING:
 			elevinf.event = ORDER
-		} else if elevdriver.GetFloor() != -1 {
+		case currentFloor != -1:
 			elevinf.event = SENSOR
-			elevinf.last_floor = elevdriver.GetFloor()
-		} else {
+			elevinf.last_floor = currentFloor
+		default:
 			elevinf.event = NO_EVENT
 		}
-		time.Sleep(1E7)
-	}
+		fmt.Printf("updated event\n")
+		// time.Sleep(1*time.Microsecond)
+	// }
 }
