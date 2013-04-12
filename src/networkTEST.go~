@@ -8,7 +8,8 @@ import(
 func main() {
 	var communicator network.CommChannels
 	communicator.CommChanInit()
-	
+	network.NetworkInit(communicator)
+
 	time.Sleep(time.Second)
 	
 	go sendTESTmail(communicator)
@@ -21,8 +22,6 @@ func main() {
 
 func sendTESTmail(communicator network.CommChannels) {
 	for {
-		message := network.Message{content: []byte("test")}
-		communicator.SendtoAll <- message
 		time.Sleep(time.Second)
 	}
 }

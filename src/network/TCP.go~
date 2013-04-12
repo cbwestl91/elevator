@@ -9,18 +9,15 @@ import(
 	"time"
 )
 
-func TCPconnectionHandler(communicator CommChannels) {
-	// Umbrella function for TCP part. Goroutines started here
-	go mapOverseer()
-	go listenTCP()
-	go sendTCP(communicator)
+func TCPHandler(communicator CommChannels) {
+	// Manager function for TCP part. Goroutines for connects are spawned here
 	
 	for {
 		select {
-		case newIP := <- internal.newIPchan: // new UDP source detected			
+		case newIP := <- internal.newIPchan: // new UDP source detected, will connect
 			go connectTCP(newIP)
-		case conn := <- internal.startNewReceivechan: 
-			conn.receiveTCP(communicator)
+		case conn := <- internal.startNewReceivechan:
+			go conn.receiveTCP(communicator)
 		}
 	}
 }
@@ -40,8 +37,11 @@ func mapOverseer() {
 			if !exists {
 				TCPmap[newMapEntry.IP] = newMapEntry.socket
 				internal.startNewReceivechan <- newMapEntry
+			} else {
+				fmt.Println("IP already exists in TCPmap. Won't do anything")
 			}
 		case deadIP := <- internal.isDeadchan: // someone stopped transmitting UDP, and needs to be removed from map
+			internal.closeConn <- deadIP
 			delete(TCPmap, deadIP)
 			// NEED TO STOP RECEIVING ON CONNECTION WITH THIS IP
 
@@ -58,25 +58,27 @@ func listenTCP(){ // listens for TCP connections
 	service := ":" + TCPport
 	addr, err := net.ResolveTCPAddr("tcp4", service)
 	if err != nil {
-		fmt.Println("error resolving TCP adress")
+		fmt.Println("net.ResolveTCPAddr error in listenTCP")
+		internal.setupFail <- true
 	} else {
 		listener, err := net.ListenTCP("tcp4", addr)
-		fmt.Println("listening for new TCP connections")
 		if err != nil {
 			fmt.Println("error listening for TCP connections: ", err)
+			internal.setupFail <- true
 		} else {
 			for {
 				socket, err := listener.Accept()
 				if err != nil {
-					fmt.Println("error accepting TCP connection")
+					fmt.Println("listener.Accept() error in listenTCP, FIX ME PLS!")
 				} else {
 					remoteElevAddr := socket.RemoteAddr().String()
-			
+
 					remoteElevSplitter := strings.Split(remoteElevAddr, ":")
 					remoteElevIP := remoteElevSplitter[0]
 					newMapEntry := TCPconnection{socket, remoteElevIP}
 
 					// found new peer. will forward info about peer
+					fmt.Println("successfully connected to: ", remoteElevIP)
 					internal.updateTCPmap <- newMapEntry
 				} // what happens if several identical copies are made? overwrite?
 			}
@@ -89,7 +91,8 @@ func connectTCP(remoteIP string) {
 	service := remoteIP + ":" + TCPport
 	_, err := net.ResolveTCPAddr("tcp4", service)
 	if err != nil {
-		fmt.Println("error resolving TCP adress")
+		fmt.Println("net.ResolveTCPAddr error in connectTCP for: ", remoteIP)
+	
 	} else {
 		conn, err := net.Dial("tcp4", service)
 		// As of now, this function might fight with listenTCP()
@@ -99,6 +102,7 @@ func connectTCP(remoteIP string) {
 		} else {
 			newMapEntry := TCPconnection{conn, remoteIP}
 			internal.updateTCPmap <- newMapEntry
+			fmt.Println("successfully connected to: ", remoteIP)
 		}
 	}
 }
@@ -117,7 +121,7 @@ func sendTCP(communicator CommChannels){
 				internal.giveMeCurrentMap <- true
 				TCPmap := <- internal.getCurrentMap
 				if TCPmap == nil {
-					fmt.Println("There are no active connections")
+					fmt.Println("Unable to send to all: there are no active connections")
 				} else {
 					for ip := range TCPmap {
 						socket := TCPmap[ip]
@@ -146,13 +150,18 @@ func sendTCP(communicator CommChannels){
 func (conn TCPconnection) receiveTCP(communicator CommChannels){
 	var msg [512]byte
 	for {
-		n, err := conn.socket.Read(msg[0:])
-		if err != nil {
-			fmt.Println("error receiving on TCP connection: error message: %s", err)
-		} else {
-			newMessage := Message{conn.IP, msg[0:n]}
-			fmt.Println("New message has been received")
-			communicator.messageReceivedchan <- newMessage
+		select {
+		case deadIP := <- internal.closeConn:
+			if deadIP == connbreak
+		default:
+			n, err := conn.socket.Read(msg[0:])
+			if err != nil {
+				fmt.Println("Read error in receiveTCP: ", conn.IP, err)
+			} else {
+				newMessage := Message{conn.IP, msg[0:n]}
+				fmt.Println("New message has been received")
+				communicator.MessageReceivedchan <- newMessage
+			}
 		}
 	}
 }

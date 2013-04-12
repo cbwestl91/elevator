@@ -8,16 +8,20 @@ import(
 
 // Here, functions implemented in this package are used and wrapped up for easy use by elevator and main packages
 
-// well.. atleast they will be in the near future. hopefully
-
-func NetworkInit(communicator CommChannels) {
-	var communicator
-	
+func NetworkInit(communicator CommChannels) {	
 	internalInit()
 	go UDPHandler(communicator)
 	go listenImAlive()
 	go sendImAlive()
+
+	time.Sleep(time.Millisecond)
+	
 	go TCPconnectionHandler(communicator)
+	go mapOverseer()
+	go listenTCP()
+	go sendTCP(communicator)
+
+	time.Sleep(time.Second)
 
 	for {
 		select {
@@ -29,7 +33,7 @@ func NetworkInit(communicator CommChannels) {
 			
 			go listenImAlive()
 			go sendImAlive()
-			go TCPconnectionHandler(communicator)
+			go listenTCP()
 		case <- time.After(400 * time.Millisecond):
 			fmt.Println("network properly initialized")
 			return
@@ -52,7 +56,7 @@ func internalInit() {
 	internal.quitsendImAlive = make(chan bool)
 	internal.quitlistenImAlive = make(chan bool)
 	internal.setupFail = make(chan bool)
-	fmt.Println("channels initialized")
+	fmt.Println("internal channels initialized")
 }
 
 func (communicator *CommChannels) CommChanInit() {
