@@ -5,13 +5,13 @@ package elevator
 
 import "elevdriver"
 import "fmt"
-import "time"
+// import "time"
 
 var floor_button int
 var direction_button int
 		
 func (elevinf *Elevatorinfo) ReceiveOrders (){
-	for {
+	// for {
 		floorbutton, directionbutton := elevdriver.GetButton()
 	
 		if elevinf.state != EMERGENCY || (elevinf.state == EMERGENCY || elevinf.event == ORDER) {
@@ -41,15 +41,16 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 		
 		floorbutton = 0
 		directionbutton = 0
-		
-		time.Sleep(1E8)
-	}
+		fmt.Printf("recievedorder\n")
+		// time.Sleep(1*time.Millisecond)
+	// }
 }
 
 func (elevinf *Elevatorinfo) StopAtCurrentFloor()(int){
-	var current int = elevdriver.GetFloor()
-	fmt.Printf("%d",current)
+	current := elevinf.last_floor
+	fmt.Printf("StopAtCurrentFloor engaging\n")
 	if elevinf.state == ASCENDING {
+		fmt.Printf("ASCENDING detected: Should i stop?\n")
 		for i := 0; i < 3; i = i+2 {
 			if current == 1 && elevinf.internal_orders[current-1][i] == 1 {
 				return 1
@@ -76,6 +77,7 @@ func (elevinf *Elevatorinfo) StopAtCurrentFloor()(int){
 			return 1	
 		}
 	} else if elevinf.state == DECENDING {
+		fmt.Printf("DECENDING detected: Should i stop?\n")
 		for i := 1; i < 3 ; i++ {
 			if current == 1 && elevinf.internal_orders[current-1][i] == 1 {
 				return -1
@@ -102,6 +104,7 @@ func (elevinf *Elevatorinfo) StopAtCurrentFloor()(int){
 			return -1
 		}
 	} else if elevinf.state == EMERGENCY {
+	fmt.Printf("Emergency shouldistop case\n")
 		for i := 0; i < 3; i++ {
 			if current == 1 && elevinf.internal_orders[0][i] == 1{
 				return 2

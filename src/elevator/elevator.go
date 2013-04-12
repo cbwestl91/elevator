@@ -4,7 +4,7 @@
 package elevator
 
 import "fmt"
-import "time"
+// import "time"
 
 type Direction int
 
@@ -42,15 +42,12 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 	
 	elevinf.BootStatemachine()
 	
-	for {
-		time.Sleep(1E7)
-		elevinf.RunStatemachine()	
-	}
-	
+	elevinf.RunStatemachine()	
+
 }
 
 func (elevinf *Elevatorinfo) PrintStatus() {
-	for {
+	// for {
 		var s1, s2, s3 string
 		switch elevinf.state {
 			case IDLE:
@@ -86,8 +83,8 @@ func (elevinf *Elevatorinfo) PrintStatus() {
 		}
 		fmt.Printf("Elevatorstatus--> State: %s Event: %s LastFloor: %d LastDirection: %s\n",
 					s1, s2, elevinf.last_floor, s3)	
-		time.Sleep(100*time.Millisecond)
-	}
+		// time.Sleep(100*time.Millisecond)
+	// }
 }
 
 

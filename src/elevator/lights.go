@@ -4,10 +4,11 @@
 package elevator
 
 import "elevdriver"
+import "fmt"
 import "time"
 
 func (elevinf *Elevatorinfo) CheckLights (){  // Updates lights according to the order_arrays!
-	for {
+	// for {
 		for i := 1; i < 4; i++ {
 			if elevinf.internal_orders[i-1][0] == 1 {
 				elevdriver.SetLight(i, 1)
@@ -29,8 +30,9 @@ func (elevinf *Elevatorinfo) CheckLights (){  // Updates lights according to the
 				elevdriver.ClearLight(i+1, 0)
 			}
 		}
-		time.Sleep(1E8)
-	}
+		fmt.Printf("checkedlights\n")
+		// time.Sleep(100*time.Millisecond)
+	// }
 }
 
 func FloorIndicator(){
