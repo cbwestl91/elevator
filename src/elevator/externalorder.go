@@ -3,7 +3,7 @@
 //-----------------------------------------------------------------------------------------//
 package elevator
 
-import "network"
+import "time"
 
 func (elevinf *Elevatorinfo) ExternalOrderDetector () {
 
@@ -43,7 +43,9 @@ func (elevinf *Elevatorinfo) ExternalOrderReceiver () {
 }
 
 func (elevinf *Elevatorinfo) ExternalOrderTimer () {
-
+	for {	
+		for elevinf.external_orders[][]
+	}
 }
 
 func (elevinf *Elevatorinfo) OrderEncoder (floor int, button int)(order_code int, message string){

@@ -1,13 +1,14 @@
 //-----------------------------------------------------------------------------------------//
 //                                    EXTERNALORDERFUNCTIONS                               //
 //-----------------------------------------------------------------------------------------//
-
 package elevator
 
-func ExternalOrderSend ()() {
+import "network"
+
+func ExternalOrderSend (message string)() {
 
 }
 
-func ExternalOrderRecieve ()() {
+func ExternalOrderRecieve ()(message string) {
 
 }
