@@ -116,33 +116,33 @@ func connectTCP(remoteIP string) {
 func sendTCP(communicator CommChannels){ 
 	for { // communication is done over channels, so function should never return
 		select {
-			case message := <- communicator.SendToAll:
-				fmt.Println("Sending message to all")
-				internal.giveMeCurrentMap <- true
-				TCPmap := <- internal.getCurrentMap
-				if TCPmap == nil {
-					fmt.Println("Unable to send to all: there are no active connections")
-				} else {
-					for ip := range TCPmap {
-						socket := TCPmap[ip]
-						socket.SetWriteDeadline(time.Now().Add(300*time.Millisecond))
-						_, err := socket.Write(message.content)
-						if err != nil {
-							fmt.Println("error sending on all TCP conns: ", err)
-						} else {
-							fmt.Println("message successfully sent to %s", ip)
-						}
+		case message := <- internal.encodedMessageSendAll:
+			fmt.Println("Sending message to all")
+			internal.giveMeCurrentMap <- true
+			TCPmap := <- internal.getCurrentMap
+			if TCPmap == nil {
+				fmt.Println("Unable to send to all: there are no active connections")
+			} else {
+				for ip := range TCPmap {
+					socket := TCPmap[ip]
+					socket.SetWriteDeadline(time.Now().Add(300*time.Millisecond))
+					_, err := socket.Write(message.Content)
+					if err != nil {
+						fmt.Println("error sending on all TCP conns: ", err)
+					} else {
+						fmt.Println("message successfully sent to %s", ip)
 					}
 				}
+			}
 
-			case message := <- communicator.SendToOne:
-				fmt.Println("Sending message to one")
-				internal.giveMeConn <- message.IP
-				socket := <- internal.getSingleConn
-				// NEED ERROR CHECK HERE ASWELL
-				socket.Write(message.content)
-				fmt.Println("message successfully sent to %s", message.IP)
-		}
+		case message := <- internal.encodedMessageSendOne:
+			fmt.Println("Sending message to one")
+			internal.giveMeConn <- message.IP
+			socket := <- internal.getSingleConn
+			// NEED ERROR CHECK HERE ASWELL
+			socket.Write(message.Content)
+			fmt.Println("message successfully sent to %s", message.IP)
+		}	
 	}
 }
 
@@ -157,9 +157,9 @@ func (conn TCPconnection) receiveTCP(communicator CommChannels){
 				return
 			}
 		} else {
-			newMessage := Message{conn.IP, msg[0:n]}
+			newMessage := encodedMessage{conn.IP, msg[0:n]}
 			fmt.Println("New message has been received")
-			communicator.MessageReceivedchan <- newMessage
+			internal.MessageReceivedchan <- newMessage
 		}
 	}
 }

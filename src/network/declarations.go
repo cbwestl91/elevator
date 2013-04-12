@@ -23,6 +23,10 @@ var(
 
 )
 
+var(
+	internal internalchannels
+)
+
 type internalchannels struct {
 	updateTCPmap chan TCPconnection // new TCP connections are shared over this channel
 	newIPchan chan string // new IPs broadcasting UDP are shared here
@@ -37,9 +41,10 @@ type internalchannels struct {
 	quitsendImAlive chan bool
 	quitlistenImAlive chan bool
 	setupFail chan bool
+	MessageReceivedchan chan encodedMessage
+	encodedMessageSendAll chan encodedMessage
+	encodedMessageSendOne chan encodedMessage
 }
-
-var internal internalchannels
 
 type TCPconnection struct { // inputs to map containing active TCP connections are of this type. IP is key, socket is content
 	socket net.Conn
@@ -47,14 +52,19 @@ type TCPconnection struct { // inputs to map containing active TCP connections a
 }
 
 type CommChannels struct { // collection of channels used for TCP communication
-	SendToAll chan Message
-	SendToOne chan Message
-	MessageReceivedchan chan Message
+	SendToAll chan DecodedMessage
+	SendToOne chan DecodedMessage
+	DecodedMessagechan chan DecodedMessage
 	getDeadIPchan chan string
 	sendDeadIPchan chan string
 }
 
-type Message struct { // outgoing/incoming messages are made into this type before being transmitted
+type DecodedMessage struct { // struct to messageHandler for outgoing
 	IP string
-	content []byte
+	Content string
+}
+
+type encodedMessage struct { // struct to messageHandler for incoming
+	IP string
+	Content []byte
 }

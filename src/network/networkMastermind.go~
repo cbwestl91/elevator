@@ -8,7 +8,7 @@ import(
 
 // Here, functions implemented in this package are used and wrapped up for easy use by elevator and main packages
 
-func NetworkInit(communicator CommChannels) {	
+func NetworkInit(communicator CommChannels) {
 	internalInit()
 	go UDPHandler(communicator)
 	go listenImAlive()
@@ -16,7 +16,8 @@ func NetworkInit(communicator CommChannels) {
 
 	time.Sleep(time.Millisecond)
 	
-	go TCPconnectionHandler(communicator)
+	go messageHandler(communicator)
+	go TCPHandler(communicator)
 	go mapOverseer()
 	go listenTCP()
 	go sendTCP(communicator)
@@ -34,7 +35,7 @@ func NetworkInit(communicator CommChannels) {
 			go listenImAlive()
 			go sendImAlive()
 			go listenTCP()
-		case <- time.After(400 * time.Millisecond):
+		case <- time.After(200 * time.Millisecond):
 			fmt.Println("network properly initialized")
 			return
 		}
@@ -56,13 +57,16 @@ func internalInit() {
 	internal.quitsendImAlive = make(chan bool)
 	internal.quitlistenImAlive = make(chan bool)
 	internal.setupFail = make(chan bool)
+	internal.MessageReceivedchan = make(chan encodedMessage)
+	internal.encodedMessageSendAll = make(chan encodedMessage)
+	internal.encodedMessageSendOne = make(chan encodedMessage)
 	fmt.Println("internal channels initialized")
 }
 
 func (communicator *CommChannels) CommChanInit() {
-	communicator.SendToAll = make(chan Message)
-	communicator.SendToOne = make(chan Message)
-	communicator.MessageReceivedchan = make(chan Message)
+	communicator.SendToAll = make(chan DecodedMessage)
+	communicator.SendToOne = make(chan DecodedMessage)
+	communicator.decodedMessagechan = make(chan DecodedMessage)
 	communicator.getDeadIPchan = make(chan string)
 	communicator.sendDeadIPchan = make(chan string)
 	fmt.Println("communicator initialized")

@@ -3,6 +3,7 @@ package main
 import(
 	"network"
 	"time"
+	"fmt"
 )
 
 func main() {
@@ -11,16 +12,22 @@ func main() {
 	network.NetworkInit(communicator)
 
 	time.Sleep(time.Second)
-	
-	go sendTESTmail(communicator)
 
 	for {
-		time.Sleep(time.Millisecond)
+		sendTESTmail(communicator)
+		time.Sleep(time.Second)
+		receiveTESTmail(communicator)
+		time.Sleep(time.Second)
 	}
 }
 
 func sendTESTmail(communicator network.CommChannels) {
-	for {
-		time.Sleep(time.Second)
-	}
+	testvar := "Will this arrive?"
+	randomstruct := network.DecodedMessage{"null", testvar}
+	communicator.SendToAll <- randomstruct
+}
+
+func receiveTESTmail(communicator network.CommChannels) {
+	received := <- communicator.DecodedMessagechan
+	fmt.Println("received message: ", received.Content)
 }

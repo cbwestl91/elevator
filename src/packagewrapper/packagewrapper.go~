@@ -1,0 +1,48 @@
+package packagewrapper
+
+
+// THIS PACKAGE BELONGS INSIDE ELEVATOR MODULE
+
+import(
+	"network"
+	"encoding/json"
+	"fmt"
+)
+
+var(
+	ordersReceivedchan chan decodedMessage
+)
+
+// HANDLE OTHER END OF ordersReceivedchan!!!!!!
+func messageHandler(communicator network.CommChannels) { // makes right format for incoming/outgoing orders and forwards to the right channel
+	select {
+	case messageIn := <- communicator.MessageReceivedchan:
+		var decoded string
+		err := json.Unmarshall(messageIn.content, &decoded)
+		if err != nil {
+			fmt.Println("FATAL ERROR: failed decoding message from: ", messageIn.IP)
+		} else {
+			message := decodedMessage{messageIn.IP, decoded}
+			ordersReceivedchan <- message
+		}
+	case order := <- communicator.SendToAll:
+		// local elevator has something for everyone. must encode into Message and forward to sendTCP
+		
+		
+	
+	case order := <- communicator.SendToOne:
+		// local elevator has something for someone in particular. must encode into Message and forward to sendTCP
+	json.Unmarshall(input, &output)
+	
+	return output
+}
+
+
+
+
+
+}
+
+
+
+

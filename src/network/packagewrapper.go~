@@ -1,0 +1,54 @@
+package network
+
+
+// THIS PACKAGE BELONGS INSIDE ELEVATOR MODULE
+
+import(
+	"encoding/json"
+	"fmt"
+)
+
+// HANDLE OTHER END OF ordersReceivedchan!!!!!!
+func messageHandler(communicator network.CommChannels) { // makes right format for incoming/outgoing orders and forwards to the right channel
+	for {
+		select {
+		case encodedMessage := <- communicator.MessageReceivedchan:
+			var decoded string
+			err := json.Unmarshal(encodedMessage.content, &decoded)
+			if err != nil {
+				fmt.Println("FATAL ERROR: failed decoding message from: ", messageIn.IP)
+			} else {
+				message := decodedMessage{encodedMessage.IP, decoded}
+				communicator.decodedMessagechan <- message
+			}
+		case decodedMessage := <- communicator.SendToAll:
+			// local elevator has something for everyone. must encode into Message and forward to sendTCP
+			encodedMessage, err := json.Marshal(decodedMessage.content)
+			if err != nil {
+				fmt.Println("FATAL ERROR: decoding before sending to all FAILED")
+			} else {
+				// SEND ON INTERNAL CHANNEL TO sendTCP
+			}
+		case decodedMessage := <- communicator.SendToOne:
+			// local elevator has something for someone in particular. must encode into Message and forward to sendTCP
+			encodedMessage, err := json.Marshal(decodedMessage.content)	
+			if err != nil {
+				fmt.Println("FATAL ERROR: decoding before sending to one FAILED: ", decodedMessage.IP)
+			} else {
+				//SEND ON INTERNAL CHANNEL TO sendTCP
+			}
+		
+	
+		return output
+	}
+}
+
+
+
+
+
+}
+
+
+
+
