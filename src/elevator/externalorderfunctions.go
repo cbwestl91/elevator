@@ -5,8 +5,10 @@ package elevator
 
 import "network"
 import "strconv"
+import "time"
+// import "fmt"
 
-func ExternalOrderSend () {
+func ExternalOrderSend (communicator network.CommChannels) {
 	for {
 		select {
 		case message := <- sendToAll:
@@ -15,34 +17,35 @@ func ExternalOrderSend () {
 		case message := <- sendToOne: // sends own cost
 			communicator.SendToOne <- message
 		case ip := <- gochan:
-			goStruct := network.DecodeMessage{ip, "Go"}
+			goStruct := network.DecodedMessage{ip, "Go"}
 			communicator.SendToOne <- goStruct
 		case ip := <- noGochan:
-			noGoStruct := network.DecodeMessage{ip, "noGo"}
+			noGoStruct := network.DecodedMessage{ip, "noGo"}
 			communicator.SendToOne <- noGoStruct
 		}
 	}
 }
 
-func ExternalOrderReceive () {
+func ExternalOrderReceive (communicator network.CommChannels) {
 	for {
 		received := <- communicator.DecodedMessagechan
-		
-		intver, err := strconv.AtoI(received.Content)
+		intver, err := strconv.Atoi(received.Content)
 		
 		if err == nil { // could convert int to string, so cost was received
 			cost := receivedCost{received.IP, intver}
 			receivedCostchan <- cost
-		} elsif received.Content == "Go" {
-				
-		} elsif received.Content == "noGo" {
-		
-		} else {
+		} else if received.Content == "Go" {
+			receivedGochan <- true
+		} else if received.Content == "noGo" {
+			receivedNoGochan <- true
+		} else if received.Content == "up 1" || received.Content == "up 2" || received.Content == "up 3" || received.Content == "down 2" || received.Content == "down 3" || received.Content == "down 4" {
 		// EXTERNAL ORDERS RECEIVED, dvs. up 1, up 2 osv..
+			incExternal <- received
+		} else { // EXTERNAL DELETION RECEIVED, dvs. del up 1, del up 2 osv..
+			content := received.Content
+			receiveDeletion <- content
 		}
-		
-		
-		incExternal <- received
+		time.Sleep(10*time.Millisecond)
 	}
 }
 

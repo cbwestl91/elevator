@@ -8,7 +8,9 @@ import "fmt"
 import "time"
 
 func (elevinf *Elevatorinfo) Initiate (){
+	fmt.Printf("Halla\n")
 	elevdriver.Init()
+	fmt.Printf("Balle\n")
 	StartMotor(-1)
 	elevinf.last_direction = 2
 	for elevdriver.GetFloor() == -1 {}
@@ -67,12 +69,12 @@ func StartMotor(direction int)() {
 func (elevinf *Elevatorinfo) StopMotor(){
 	if elevinf.last_direction == 1 {
 		elevdriver.MotorDown()
-		time.Sleep(14*time.Millisecond)
+		time.Sleep(10*time.Millisecond)
 		elevdriver.MotorStop()
 		fmt.Printf("Stopping...\n")
 	} else if elevinf.last_direction == 2 {
 		elevdriver.MotorUp()
-		time.Sleep(14*time.Millisecond)
+		time.Sleep(10*time.Millisecond)
 		fmt.Printf("Stopping...\n")
 		elevdriver.MotorStop()
 	}

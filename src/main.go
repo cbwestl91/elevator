@@ -7,6 +7,5 @@ func main () {
 	elevinf := elevator.Elevatorinfo{}
 	elevinf.HandleElevator()
 	return
-
 }
 

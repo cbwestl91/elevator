@@ -44,6 +44,14 @@ func (elevinf *Elevatorinfo) HandleElevator() {
 		elevinf.external_orders[i] = make([]int, N_BUTTONS-1)
 	}
 	
+	network.NetworkInit(communicator)
+	go elevinf.ExternalOrderMaster(communicator)
+	go elevinf.ExternalOrderSlave()
+	go elevinf.ExternalOrderTimer()
+	go elevinf.ExternalRecvDelete()
+	go ExternalOrderSend(communicator)
+	go ExternalOrderReceive(communicator)
+	
 	elevinf.BootStatemachine()
 	
 	elevinf.RunStatemachine()	

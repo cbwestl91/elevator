@@ -3,14 +3,12 @@
 //-----------------------------------------------------------------------------------------//
 package elevator
 
-import "strconv"
-
-func (elevinf *Elevatorinfo) MyCost(ordered_floor int)(cost string){
+func (elevinf *Elevatorinfo) MyCost (ordered_floor int) (cost int){
 	// ordered_floor is int from the decoder, makes it easier
 	my_cost := 0
 	for i := 0; i < 4; i++ {
-		for j := 0; i < 3; i++ {
-				if elevinf.internal_orders[i][j] == 1 {
+		for j := 0; j < 3; j++ {
+			if elevinf.internal_orders[i][j] == 1 {
 					my_cost++
 				}
 		}
@@ -27,7 +25,7 @@ func (elevinf *Elevatorinfo) MyCost(ordered_floor int)(cost string){
 		wanted_floor = 4
 	}
 	
-	wanted_direction := 0
+	var wanted_direction Direction = 0
 	if ordered_floor == 0 || ordered_floor == 1 || ordered_floor == 3 {
 		wanted_direction = 1
 	} else if ordered_floor == 2 || ordered_floor == 4 || ordered_floor == 5 {
@@ -42,6 +40,8 @@ func (elevinf *Elevatorinfo) MyCost(ordered_floor int)(cost string){
 		my_cost++
 	}
 	
-	cost = strconv.ItoA(my_cost)
+	if elevinf.state == EMERGENCY {
+		my_cost = my_cost+100
+	}
 	return cost
 }

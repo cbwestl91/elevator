@@ -17,14 +17,14 @@ func (elevinf *Elevatorinfo) ReceiveOrders (){
 		if elevinf.state != EMERGENCY || (elevinf.state == EMERGENCY || elevinf.event == ORDER) {
 			for i := 1; i < 4; i++ { // First column of the order slice refers to UP buttons
 				if i == floorbutton && directionbutton == 1 {
-					elevinf.internal_orders[i-1][0] = 1
-					// elevinf.external_orders[i-1][0] = 1
+					//elevinf.internal_orders[i-1][0] = 1
+					elevinf.external_orders[i-1][0] = 1
 				}
 			}
 			for i := 2; i < 5; i++ { // Second column of the order slice refers to DOWN buttons
 				if i == floorbutton && directionbutton == 2 {
-					elevinf.internal_orders[i-1][1] = 1
-					// elevinf.external_orders[i-1][1] = 1
+					//elevinf.internal_orders[i-1][1] = 1
+					elevinf.external_orders[i-1][1] = 1
 				}
 			}
 		}
@@ -124,61 +124,42 @@ func (elevinf *Elevatorinfo) DeleteOrders(){
 	if elevdriver.GetFloor() == 1{
 		for i := 0; i < 3; i++ {
 			elevinf.internal_orders[0][i] = 0
+			elevinf.external_orders[0][0] = 0
+			go ExternalSendDelete(0,0)
+			
 		}
-	} else if elevdriver.GetFloor() == 2{
-		for i := 0; i < 3; i++ {
+	} else if elevdriver.GetFloor() == 2 && elevinf.last_direction == UP{
+		for i := 0; i < 3; i = i+2 {
 			elevinf.internal_orders[1][i] = 0
+			elevinf.external_orders[1][0] = 0
+			go ExternalSendDelete(1,0)
 		}
-	} else if elevdriver.GetFloor() == 3{
-		for i := 0; i < 3; i++ {
+	} else if elevdriver.GetFloor() == 2 && elevinf.last_direction == DOWN{
+		for i := 1; i < 3; i++ {
+			elevinf.internal_orders[1][i] = 0
+			elevinf.external_orders[1][1] = 0
+			go ExternalSendDelete(1,1)
+		}
+	} else if elevdriver.GetFloor() == 3 && elevinf.last_direction == UP{
+		for i := 0; i < 3; i = i+2 {
 			elevinf.internal_orders[2][i] = 0
+			elevinf.external_orders[2][0] = 0
+			go ExternalSendDelete(2,0)
+		}
+	} else if elevdriver.GetFloor() == 3 && elevinf.last_direction == DOWN{
+		for i := 1; i < 3; i++ {
+			elevinf.internal_orders[2][i] = 0
+			elevinf.external_orders[2][1] = 0
+			go ExternalSendDelete(2,1)
 		}
 	} else if elevdriver.GetFloor() == 4{
 		for i := 0; i < 3; i++ {
 			elevinf.internal_orders[3][i] = 0
+			elevinf.external_orders[3][1] = 0
+			go ExternalSendDelete(3,1)
 		}
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
