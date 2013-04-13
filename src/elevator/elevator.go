@@ -27,6 +27,15 @@ type Elevatorinfo struct {
 var N_FLOORS, N_BUTTONS int = 4, 3
 
 func (elevinf *Elevatorinfo) HandleElevator() {
+
+	sendToAll = make(chan string)
+	sendToOne = make(chan network.DecodedMessage)
+	receivedCostchan = make(chan receivedCost)
+	receivedGochan = make(chan bool)
+	receivedNoGochan = make(chan bool)
+	receiveDeletion = make(chan string)
+	gochan =  make(chan string)
+	noGochan = make(chan string)
 	
 	var communicator network.CommChannels
 	communicator.CommChanInit()
