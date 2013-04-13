@@ -45,5 +45,5 @@ func messageHandler(communicator CommChannels) { // makes right format for incom
 				internal.encodedMessageSendOne <- final
 			}
 		}
-	}
+	} 
 }

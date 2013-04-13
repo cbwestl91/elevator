@@ -120,7 +120,7 @@ func sendTCP(communicator CommChannels){
 			fmt.Println("Sending message to all")
 			internal.giveMeCurrentMap <- true
 			TCPmap := <- internal.getCurrentMap
-			if TCPmap == nil {
+			if len(TCPmap) == 0 {
 				fmt.Println("Unable to send to all: there are no active connections")
 			} else {
 				for ip := range TCPmap {
@@ -142,7 +142,7 @@ func sendTCP(communicator CommChannels){
 			// NEED ERROR CHECK HERE ASWELL
 			socket.Write(message.Content)
 			fmt.Println("message successfully sent to %s", message.IP)
-		}	
+		}
 	}
 }
 

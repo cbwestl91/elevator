@@ -12,12 +12,12 @@ func main() {
 	network.NetworkInit(communicator)
 
 	time.Sleep(time.Second)
+	
+	go receiveTESTmail(communicator)
 
 	for {
 		sendTESTmail(communicator)
-		time.Sleep(time.Second)
-		receiveTESTmail(communicator)
-		time.Sleep(time.Second)
+		time.Sleep(400*time.Millisecond)
 	}
 }
 
@@ -28,6 +28,8 @@ func sendTESTmail(communicator network.CommChannels) {
 }
 
 func receiveTESTmail(communicator network.CommChannels) {
-	received := <- communicator.DecodedMessagechan
-	fmt.Println("received message: ", received.Content)
+	for {
+		received := <- communicator.DecodedMessagechan
+		fmt.Println("received message: ", received.Content)
+	}
 }
