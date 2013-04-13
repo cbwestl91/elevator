@@ -3,9 +3,11 @@
 //-----------------------------------------------------------------------------------------//
 package elevator
 
-func (elevinf *Elevatorinfo) MyCost(ordered_floor int)(my_cost int){
+import "strconv"
+
+func (elevinf *Elevatorinfo) MyCost(ordered_floor int)(cost string){
 	// ordered_floor is int from the decoder, makes it easier
-	my_cost = 0
+	my_cost := 0
 	for i := 0; i < 4; i++ {
 		for j := 0; i < 3; i++ {
 				if elevinf.internal_orders[i][j] == 1 {
@@ -39,8 +41,7 @@ func (elevinf *Elevatorinfo) MyCost(ordered_floor int)(my_cost int){
 	} else if elevinf.last_floor == wanted_floor {
 		my_cost++
 	}
-
-	return my_cost
+	
+	cost = strconv.ItoA(my_cost)
+	return cost
 }
-
- 

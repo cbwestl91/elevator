@@ -69,5 +69,7 @@ func (communicator *CommChannels) CommChanInit() {
 	communicator.DecodedMessagechan = make(chan DecodedMessage)
 	communicator.getDeadIPchan = make(chan string)
 	communicator.sendDeadIPchan = make(chan string)
+	communicator.GiveMeCurrentAlives = make(chan bool)
+	communicator.GetCurrentAlives = make(chan map[string]time.Time)
 	fmt.Println("communicator initialized")
 }

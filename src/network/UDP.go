@@ -34,6 +34,9 @@ func UDPHandler(communicator CommChannels) { //goroutine that keeps track of who
 			}
 		case deadIP := <- communicator.sendDeadIPchan:
 			internal.closeConn <- deadIP
+		// elevator pack might want alives to count who will give cost
+		case <- communicator.GiveMeCurrentAlives:
+			communicator.GetCurrentAlives <- aliveMap
 		}
 	}
 }

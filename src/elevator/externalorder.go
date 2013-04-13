@@ -4,42 +4,128 @@
 package elevator
 
 import "time"
+import "network"
 
-func (elevinf *Elevatorinfo) ExternalOrderDetector () {
+var(
+	sendToAll chan string
+	sendToOne chan string
+	receivedCostchan chan int
+	receivedGochan chan bool
+	receivedNoGochan chan bool
+	
+	gochan chan string // IP string
+	noGochan chan string
+	
+	incExternal chan network.DecodedMessage
+)
 
-	checker, pos_one, pos_two, order_int, my_cost := 0, 0, 0, 0, 0
-	var message string
-	for { // Checking for "own" external orders
-		for i := 0; i < 4; i++ {
-			for j := 0; j < 2; j++ {
-					if elevinf.external_orders[i][j] == 1 {
-						checker++
-						if checker > 0 {
-							pos_one = i
-							pos_two = j
-							break
+var receivedCost struct {
+	IP string
+	cost int
+}
+	
+
+func (elevinf *Elevatorinfo) ExternalOrderMaster () {
+	for {
+		checker, pos1, pos2, order_int, my_cost := 0, 0, 0, 0, 0
+		var message string
+		for { // Checking for "own" external orders
+			for i := 0; i < 4; i++ {
+				for j := 0; j < 2; j++ {
+						if elevinf.external_orders[i][j] == 1 {
+							checker++
+							if checker > 0 {
+								pos1 = i
+								pos2 = j
+								break
+							}
 						}
+					if checker > 0 {
+						break
 					}
-				if checker > 0 {
-					break
 				}
 			}
-		}
 		
-		if checker == 1  { // External order detected!
-			order_int, message = OrderEncoder(pos_one,pos_two)
-			my_cost = elevinf.MyCost(order_int)
-			
+			if checker == 1  { // External order detected!
+				order_int, message = OrderPacker(pos1,pos2)
+				
+				my_cost = elevinf.MyCost(order_int)
+				
+				sendToAll <- message
+				
+				// CREATE MAP::::                        important :       var costMap map[string]int
+				costMap = make(map[string]int)
+				
+				communicator.GiveMeCurrentAlives <- true
+				aliveMap := <- communicator.GetCurrentAlives
+				
+				howManyIPs := len(aliveMap)
+				
+				for len(costMap) < howManyIPs {
+					select {
+						case costStruct := <- receivedCostchan
+							costMap[costStruct.IP] = costStruct.IP
+						case <- time.After(100*time.Millisecond)
+						break
+					}
+				}
+				currentBest := my_cost
+				currentBestIP := "Handle self"
+				
+				for ip, _ := range(costMap){
+					if costMap[ip] < currentBest {
+						currentBest = costMap[ip]
+						currentBestIP = ip
+					}
+				}
+				
+				if currentBestIP == "Handle self" {
+					// handle self and send nogo to everyone else
+					elevinf.internal_orders[pos1][pos2] = 1
+					for ip, _ := range(costMap) {
+						noGochan <- ip
+					}
+				} else {
+					for ip, _ := range(costMap) {
+						if costMap[ip] == currentBest {
+							gochan <- ip
+						} else {
+							noGochan <- ip
+						}
+					}
+				}
+				elevinf.external_orders[pos1][pos2] = -1
+			}
+			checker = 0
+			pos_one = 0
+			pos_two = 0
 		}
-		checker = 0
-		pos_one = 0
-		pos_two = 0
 	}
-	
 }
 
-func (elevinf *Elevatorinfo) ExternalOrderReceiver () {
-	
+func (elevinf *Elevatorinfo) ExternalOrderSlave () {
+	for {
+		receiver := <- incExternal
+		ip := receiver.IP
+		message := receiver.Content
+		
+		pos1, pos2, order_int := OrderUnpacker(message)
+		
+		my_cost := elevinf.MyCost(order_int)
+		
+		decoded := network.DecodedMessage{ip, message}
+		
+		sendToOne <- decoded
+		
+		select {
+			case <- receivedGochan:
+				elevinf.internal_orders[pos1][pos2] = 1
+			case <- receivedNoGochan:
+				elevinf.external_orders[pos1][pos2] = -1
+			default:
+				time.Sleep(time.Millisecond)
+		}
+	}
 }
 
 func (elevinf *Elevatorinfo) ExternalOrderTimer () {
@@ -48,7 +134,7 @@ func (elevinf *Elevatorinfo) ExternalOrderTimer () {
 	}
 }
 
-func (elevinf *Elevatorinfo) OrderEncoder (floor int, button int)(order_code int, message string){
+func OrderPacker (floor int, button int)(order_code int, message string){
 	if floor = 0 && b = 0 {
 		order_code = 0
 		message = "up 1"
@@ -71,7 +157,7 @@ func (elevinf *Elevatorinfo) OrderEncoder (floor int, button int)(order_code int
 	return order_code, message
 }
 
-func (elevinf *Elevatorinfo) OrderDecoder (message string)(floor int, button int, order_code int){
+func OrderUnpacker (message string)(floor int, button int, order_code int){
 	if message == "up 1" {
 		floor, button, order_code = 0, 0, 0
 	} else if  message == "up 2" {

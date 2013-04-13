@@ -4,6 +4,7 @@
 package elevator
 
 import "fmt"
+import "network"
 // import "time"
 
 type Direction int
@@ -24,8 +25,11 @@ type Elevatorinfo struct {
 }
 
 var N_FLOORS, N_BUTTONS int = 4, 3
-	
+
 func (elevinf *Elevatorinfo) HandleElevator() {
+	
+	var communicator network.CommChannels
+	communicator.CommChanInit()
 	
 	elevinf.state = IDLE
 	elevinf.event = NO_EVENT

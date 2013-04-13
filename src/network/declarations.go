@@ -57,6 +57,8 @@ type CommChannels struct { // collection of channels used for TCP communication
 	DecodedMessagechan chan DecodedMessage
 	getDeadIPchan chan string
 	sendDeadIPchan chan string
+	GiveMeCurrentAlives chan bool // can both struct have same names?
+	GetCurrentAlives chan map[string]time.Time
 }
 
 type DecodedMessage struct { // struct to messageHandler for outgoing

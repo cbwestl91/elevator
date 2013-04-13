@@ -40,7 +40,7 @@ func (elevinf *Elevatorinfo) UpdateLastDirection(){
 			elevinf.last_direction = 2
 		}
 		fmt.Printf("Updated direction\n")
-		time.Sleep(100*time.Millisecond)
+		// time.Sleep(100*time.Millisecond)
 	// }
 }
 
