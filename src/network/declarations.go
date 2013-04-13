@@ -2,6 +2,7 @@ package network
 
 import(
 	"net"
+	"time"
 )
 
 // ALL THIS CHANNEL USE MIGHT BE PRONE TO DEADLOCKS. GOOD IDEA TO IMPLEMENT TIMEOUTS?
